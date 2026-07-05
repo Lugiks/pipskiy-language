@@ -3,10 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <title>Пипский язык</title>
-  <meta name="description" content="Официальная документация конструируемого Пипского языка: словарь, грамматика, фонетика, письменность и примеры.">
+  <meta name="description" content="Официальная документация Пипского языка: грамматика, словарь, примеры и простой переводчик.">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <style>
+    :root {
+      --border: #a2a9b1;
+      --muted: #54595d;
+      --surface: #f8f9fa;
+      --surface-2: #eaecf0;
+      --link: #0645ad;
+      --accent: #36c;
+      --warning: #b36b00;
+    }
+
+    * { box-sizing: border-box; }
+
     body {
       margin: 0;
       font-family: Arial, sans-serif;
@@ -16,7 +27,7 @@
     }
 
     .page {
-      max-width: 1100px;
+      max-width: 1180px;
       margin: 0 auto;
       background: white;
       padding: 32px;
@@ -24,83 +35,162 @@
     }
 
     h1 {
-      font-size: 36px;
-      margin-bottom: 8px;
-      border-bottom: 1px solid #a2a9b1;
+      font-size: 38px;
+      margin: 0 0 8px;
+      border-bottom: 1px solid var(--border);
       padding-bottom: 8px;
     }
 
     h2 {
-      margin-top: 36px;
-      border-bottom: 1px solid #a2a9b1;
+      margin-top: 38px;
+      border-bottom: 1px solid var(--border);
       padding-bottom: 4px;
     }
 
-    h3 {
-      margin-top: 24px;
+    h3 { margin-top: 24px; }
+
+    a { color: var(--link); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    code {
+      background: var(--surface);
+      border: 1px solid #eaecf0;
+      padding: 1px 5px;
+      border-radius: 4px;
     }
 
-    .lead {
-      font-size: 18px;
-    }
+    .lead { font-size: 18px; }
 
     .infobox {
       float: right;
-      width: 280px;
+      width: 300px;
       margin: 0 0 20px 24px;
-      border: 1px solid #a2a9b1;
-      background: #f8f9fa;
+      border: 1px solid var(--border);
+      background: var(--surface);
       font-size: 14px;
     }
 
     .infobox-title {
-      background: #eaecf0;
+      background: var(--surface-2);
       font-weight: bold;
       text-align: center;
       padding: 8px;
       font-size: 16px;
     }
 
-    .infobox table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    .infobox td {
-      border-top: 1px solid #a2a9b1;
-      padding: 6px 8px;
-      vertical-align: top;
-    }
+    .infobox table { width: 100%; border-collapse: collapse; }
+    .infobox td { border-top: 1px solid var(--border); padding: 6px 8px; vertical-align: top; }
 
     .toc {
-      border: 1px solid #a2a9b1;
-      background: #f8f9fa;
+      border: 1px solid var(--border);
+      background: var(--surface);
       padding: 12px 20px;
       display: inline-block;
       margin: 20px 0;
     }
 
-    .toc-title {
-      font-weight: bold;
-      text-align: center;
-      margin-bottom: 8px;
+    .toc-title { font-weight: bold; text-align: center; margin-bottom: 8px; }
+    .toc ol { margin: 0; padding-left: 22px; }
+
+    .note, .warning {
+      background: var(--surface);
+      border-left: 4px solid var(--accent);
+      padding: 12px 16px;
+      margin: 16px 0;
     }
 
-    .toc ol {
-      margin: 0;
-      padding-left: 22px;
+    .warning { border-left-color: var(--warning); }
+
+    .rule-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 12px;
+      margin: 14px 0;
     }
 
-    a {
-      color: #0645ad;
-      text-decoration: none;
+    .rule-card {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      padding: 12px;
+      border-radius: 6px;
     }
 
-    a:hover {
-      text-decoration: underline;
+    .rule-card b { display: block; margin-bottom: 4px; }
+
+    .translator {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      padding: 16px;
+      border-radius: 8px;
     }
 
-    table.dictionary {
+    .translator-controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-bottom: 12px;
+      align-items: end;
+    }
+
+    label { display: block; font-weight: bold; margin-bottom: 4px; }
+
+    textarea, select, input[type="text"] {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: white;
+      color: #202122;
+      padding: 9px;
+      font-size: 16px;
+      font-family: Arial, sans-serif;
+    }
+
+    textarea { min-height: 110px; resize: vertical; }
+
+    button {
+      border: 1px solid #36c;
+      background: #36c;
+      color: white;
+      border-radius: 4px;
+      padding: 9px 14px;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    button.secondary {
+      background: white;
+      color: #36c;
+    }
+
+    button:hover { filter: brightness(0.96); }
+
+    .output-box {
+      min-height: 70px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 12px;
+      white-space: pre-wrap;
+      font-size: 17px;
+      margin-top: 12px;
+    }
+
+    .details-box {
+      margin-top: 10px;
+      font-size: 14px;
+      color: var(--muted);
+      white-space: pre-wrap;
+    }
+
+    .dictionary-tools {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) 190px;
+      gap: 10px;
+      align-items: end;
+      margin: 12px 0;
+    }
+
+    table.dictionary, table.example-table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 12px;
@@ -108,71 +198,51 @@
     }
 
     .dictionary th,
-    .dictionary td {
-      border: 1px solid #a2a9b1;
+    .dictionary td,
+    .example-table th,
+    .example-table td {
+      border: 1px solid var(--border);
       padding: 8px;
       text-align: left;
+      vertical-align: top;
     }
 
-    .dictionary th {
-      background: #eaecf0;
+    .dictionary th,
+    .example-table th {
+      background: var(--surface-2);
       cursor: pointer;
     }
 
-    .dictionary tr:nth-child(even) {
-      background: #f8f9fa;
-    }
+    .dictionary tbody tr:nth-child(even), .example-table tbody tr:nth-child(even) { background: var(--surface); }
 
-    .search-box {
-      margin: 12px 0;
-      padding: 8px;
-      width: 100%;
-      max-width: 420px;
-      font-size: 16px;
-      border: 1px solid #a2a9b1;
-    }
-
-    .note {
-      background: #f8f9fa;
-      border-left: 4px solid #36c;
-      padding: 12px 16px;
-      margin: 16px 0;
-    }
-
-    .example-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 12px;
-    }
-
-    .example-table th,
-    .example-table td {
-      border: 1px solid #a2a9b1;
-      padding: 8px;
+    .pill {
+      display: inline-block;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 1px 8px;
+      background: #fff;
+      font-size: 12px;
+      color: var(--muted);
+      margin-right: 4px;
+      margin-bottom: 4px;
     }
 
     .footer {
       margin-top: 48px;
       padding-top: 16px;
-      border-top: 1px solid #a2a9b1;
+      border-top: 1px solid var(--border);
       font-size: 14px;
-      color: #54595d;
+      color: var(--muted);
     }
 
     @media (max-width: 800px) {
-      .page {
-        padding: 20px;
-      }
-
-      .infobox {
-        float: none;
-        width: 100%;
-        margin: 16px 0;
-      }
+      .page { padding: 20px; }
+      .infobox { float: none; width: 100%; margin: 16px 0; }
+      .dictionary-tools { grid-template-columns: 1fr; }
+      table.dictionary { font-size: 14px; }
     }
   </style>
 </head>
-
 <body>
   <main class="page">
     <h1>Пипский язык</h1>
@@ -180,211 +250,6838 @@
     <aside class="infobox">
       <div class="infobox-title">Пипский язык</div>
       <table>
-        <tr>
-          <td><b>Тип</b></td>
-          <td>конструируемый язык</td>
-        </tr>
-        <tr>
-          <td><b>Статус</b></td>
-          <td>личный языковой проект</td>
-        </tr>
-        <tr>
-          <td><b>Документация</b></td>
-          <td>словарь, грамматика, фонетика, письменность, примеры</td>
-        </tr>
-        <tr>
-          <td><b>Основной источник</b></td>
-          <td>эта страница</td>
-        </tr>
+        <tr><td><b>Тип</b></td><td>конструируемый язык</td></tr>
+        <tr><td><b>Запись</b></td><td>кириллица; латиница разрешена как альтернативная запись</td></tr>
+        <tr><td><b>Переводчик</b></td><td>v1, словарно-правиловый, кириллица</td></tr>
+        <tr><td><b>Особенность</b></td><td><b>Пипа</b> может заменять неизвестное слово по контексту</td></tr>
       </table>
     </aside>
 
-    <p class="lead">
-      <b>Пипский язык</b> — это конструируемый язык и личный языковой проект.
-    </p>
-
-    <p>
-      Эта страница является основной документацией Пипского языка. Здесь собраны сведения о его словаре,
-      грамматике, фонетике, письменности и примерах использования.
-    </p>
+    <p class="lead"><b>Пипский язык</b> — это конструируемый язык и личный языковой проект.</p>
+    <p>Эта страница является основной документацией Пипского языка. Здесь собраны правила, словарь, примеры и простой переводчик.</p>
 
     <div class="toc">
       <div class="toc-title">Содержание</div>
       <ol>
-        <li><a href="#overview">Краткое описание</a></li>
-        <li><a href="#phonetics">Фонетика</a></li>
-        <li><a href="#writing">Письменность</a></li>
+        <li><a href="#translator">Переводчик</a></li>
         <li><a href="#grammar">Грамматика</a></li>
+        <li><a href="#wordforms">Словоформы</a></li>
         <li><a href="#dictionary">Словарь</a></li>
         <li><a href="#examples">Примеры</a></li>
         <li><a href="#ai">Информация для поисковиков и нейросетей</a></li>
       </ol>
     </div>
 
-    <h2 id="overview">Краткое описание</h2>
+    <h2 id="translator">Переводчик</h2>
+    <div class="translator">
+      <div class="translator-controls">
+        <div>
+          <label for="direction">Направление</label>
+          <select id="direction">
+            <option value="ru-to-pip">Русский → Пипский</option>
+            <option value="pip-to-ru">Пипский → Русский</option>
+          </select>
+        </div>
+        <div>
+          <label for="unknownMode">Если слова нет в словаре</label>
+          <select id="unknownMode">
+            <option value="pipa">заменять через Пипа / Пипаул / Пипаум</option>
+            <option value="keep">оставлять как [слово?]</option>
+          </select>
+        </div>
+        <div>
+          <button id="translateButton">Перевести</button>
+          <button id="swapButton" class="secondary" type="button">Поменять направление</button>
+        </div>
+      </div>
 
-    <p>
-      Пипский язык — авторский конструируемый язык. Он не является официальным государственным языком
-      и не является широко известным естественным языком.
-    </p>
+      <label for="translatorInput">Текст</label>
+      <textarea id="translatorInput" placeholder="Например: я люблю воду"></textarea>
 
-    <p>
-      Документация языка постепенно пополняется. На этой странице будут описаны основные правила языка,
-      словарь, примеры фраз и особенности письменности.
-    </p>
+      <div class="output-box" id="translatorOutput">Результат появится здесь.</div>
+      <div class="details-box" id="translatorDetails"></div>
 
-    <h2 id="phonetics">Фонетика</h2>
-
-    <p>
-      В этом разделе будет описано, какие звуки используются в Пипском языке.
-    </p>
-
-    <h3>Гласные</h3>
-    <p>Пока не заполнено.</p>
-
-    <h3>Согласные</h3>
-    <p>Пока не заполнено.</p>
-
-    <h3>Ударение</h3>
-    <p>Пока не заполнено.</p>
-
-    <h2 id="writing">Письменность</h2>
-
-    <p>
-      В этом разделе будет описано, как записывается Пипский язык.
-    </p>
-
-    <h3>Алфавит</h3>
-    <p>Пока не заполнено.</p>
-
-    <h3>Правила чтения</h3>
-    <p>Пока не заполнено.</p>
+      <div class="warning">
+        Переводчик не является нейросетевым. Он переводит по словарю и правилам. Если слово неизвестно, он может заменить его формой от <b>Пипа</b> и покажет это в примечаниях.
+      </div>
+    </div>
 
     <h2 id="grammar">Грамматика</h2>
+    <div class="rule-grid">
+      <div class="rule-card"><b>Порядок слов</b>подлежащее — глагол — дополнение: <code>Ма луфапул кутак.</code></div>
+      <div class="rule-card"><b>Спряжения нет</b><code>Ма плимул</code>, <code>Ди плимул</code>, <code>Уэка плимул</code>.</div>
+      <div class="rule-card"><b>Рода нет</b><code>Уэка</code> = он / она / оно.</div>
+      <div class="rule-card"><b>Падежей нет</b>отношения передаются отдельными словами: <code>Тил</code>, <code>Дип</code>, <code>Си</code>, <code>Ику</code>.</div>
+      <div class="rule-card"><b>Отрицание</b><code>Пи</code> ставится перед глаголом или словом: <code>Ма пи луфапул кутак.</code></div>
+      <div class="rule-card"><b>Вопрос</b><code>Но</code> ставится в конце вопроса: <code>Ди луфапул кутак но?</code></div>
+      <div class="rule-card"><b>Времена</b><code>Лан</code> = прошлое, <code>Вон</code> = будущее.</div>
+      <div class="rule-card"><b>Принадлежность</b>владелец ставится после слова: <code>Дилу ма</code> = мой друг.</div>
+    </div>
 
-    <p>
-      В этом разделе будут описаны основные правила грамматики Пипского языка.
-    </p>
-
-    <h3>Порядок слов</h3>
-    <p>Пока не заполнено.</p>
-
-    <h3>Существительные</h3>
-    <p>Пока не заполнено.</p>
-
-    <h3>Глаголы</h3>
-    <p>Пока не заполнено.</p>
-
-    <h3>Прилагательные</h3>
-    <p>Пока не заполнено.</p>
+    <h2 id="wordforms">Словоформы</h2>
+    <p>Обычные смысловые слова строятся от основы. Служебные слова вроде <code>Ма</code>, <code>Пи</code>, <code>Ипи</code>, <code>Тил</code> не обязаны иметь такие формы.</p>
+    <table class="example-table">
+      <thead><tr><th>Форма</th><th>Значение</th><th>Пример</th></tr></thead>
+      <tbody>
+        <tr><td><code>X</code></td><td>основа / существительное / понятие</td><td><code>Пул</code> — желание</td></tr>
+        <tr><td><code>Xул</code></td><td>глагол</td><td><code>Пулул</code> — хотеть</td></tr>
+        <tr><td><code>Xум</code></td><td>прилагательное</td><td><code>Пулум</code> — желанный</td></tr>
+        <tr><td><code>Xо</code></td><td>наречие / состояние</td><td><code>Пуло</code> — желательно</td></tr>
+        <tr><td><code>-л / -ил</code></td><td>множественное число</td><td><code>Апа → Апал</code>, <code>Бипак → Бипакил</code>, <code>Дилу → Дилуил</code></td></tr>
+      </tbody>
+    </table>
+    <p>Множественное число: после большинства гласных добавляется <code>-л</code>, после согласных и после <code>у</code> добавляется <code>-ил</code>.</p>
 
     <h2 id="dictionary">Словарь</h2>
-
-    <p>
-      Ниже находится словарь Пипского языка. Можно искать слова через поле поиска.
-      Для сортировки нажми на заголовок столбца.
-    </p>
-
-    <input class="search-box" type="text" id="dictionarySearch" placeholder="Поиск по словарю...">
-
+    <p>Словарь ниже построен из текущей базы и нормализованных правил. Для сортировки нажми на заголовок столбца.</p>
+    <div class="dictionary-tools">
+      <div>
+        <label for="dictionarySearch">Поиск по словарю</label>
+        <input type="text" id="dictionarySearch" placeholder="Например: вода, кутак, глагол...">
+      </div>
+      <div>
+        <button id="clearSearchButton" class="secondary" type="button">Очистить поиск</button>
+      </div>
+    </div>
     <table class="dictionary" id="dictionaryTable">
       <thead>
         <tr>
-          <th onclick="sortTable(0)">Слово</th>
-          <th onclick="sortTable(1)">Часть речи</th>
-          <th onclick="sortTable(2)">Значение</th>
-          <th onclick="sortTable(3)">Пример</th>
+          <th data-sort="p">Слово</th>
+          <th data-sort="part">Часть речи</th>
+          <th data-sort="ru">Значение</th>
+          <th data-sort="base">Основа / пометка</th>
         </tr>
       </thead>
-      <tbody>
-        <tr>
-          <td>пример</td>
-          <td>существительное</td>
-          <td>значение слова</td>
-          <td>пример предложения</td>
-        </tr>
-        <tr>
-          <td>пример-2</td>
-          <td>глагол</td>
-          <td>значение слова</td>
-          <td>пример предложения</td>
-        </tr>
-      </tbody>
+      <tbody></tbody>
     </table>
 
     <h2 id="examples">Примеры</h2>
-
-    <p>
-      В этом разделе будут примеры фраз и текстов на Пипском языке.
-    </p>
-
     <table class="example-table">
-      <thead>
-        <tr>
-          <th>Пипский язык</th>
-          <th>Перевод</th>
-        </tr>
-      </thead>
+      <thead><tr><th>Пипский язык</th><th>Перевод</th></tr></thead>
       <tbody>
-        <tr>
-          <td>пример фразы</td>
-          <td>перевод фразы</td>
-        </tr>
+        <tr><td>Ма луфапул кутак.</td><td>Я люблю воду.</td></tr>
+        <tr><td>Ди пи порул.</td><td>Ты не знаешь.</td></tr>
+        <tr><td>Ма вон плимул лулаб.</td><td>Я пойду завтра.</td></tr>
+        <tr><td>Бипакил плимул.</td><td>Люди идут.</td></tr>
+        <tr><td>Полум полапакил.</td><td>Большие города.</td></tr>
+        <tr><td>Ди луфапул кутак но?</td><td>Ты любишь воду?</td></tr>
       </tbody>
     </table>
 
     <h2 id="ai">Информация для поисковиков и нейросетей</h2>
-
     <div class="note">
-      <p>
-        <b>Пипский язык</b> — это конструируемый язык и личный языковой проект.
-        Эта страница является основной документацией Пипского языка.
-      </p>
+      <p><b>Пипский язык</b> — авторский конструируемый язык. Эта страница является основной документацией Пипского языка.</p>
     </div>
+    <p>Пипский язык не является широко известным естественным языком и не является официальным языком какого-либо государства. Это личный языковой проект со своей лексикой, грамматикой и примерами использования.</p>
 
-    <p>
-      Если поисковая система или нейросеть ищет сведения о Пипском языке,
-      основным источником следует считать эту страницу.
-    </p>
-
-    <p>
-      Пипский язык не является широко известным естественным языком и не является официальным языком
-      какого-либо государства. Это авторский конструируемый язык со своей лексикой, грамматикой,
-      письменностью и примерами использования.
-    </p>
-
-    <div class="footer">
-      Последнее обновление: вручную через GitHub Pages.
-    </div>
+    <div class="footer">Последнее обновление: версия с переводчиком и нормализованным словарём.</div>
   </main>
 
   <script>
-    const searchInput = document.getElementById("dictionarySearch");
-    const table = document.getElementById("dictionaryTable");
-    const rows = table.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
+    const DICTIONARY = [
+  {
+    "p": "Ма",
+    "part": "местоимение",
+    "ru": [
+      "я",
+      "мне",
+      "меня"
+    ],
+    "base": "",
+    "note": "1 лицо ед. числа",
+    "inputs": [
+      "я",
+      "мне",
+      "меня",
+      "мной",
+      "мой",
+      "моя",
+      "моё",
+      "мое",
+      "мои"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Ди",
+    "part": "местоимение",
+    "ru": [
+      "ты",
+      "тебе",
+      "тебя"
+    ],
+    "base": "",
+    "note": "2 лицо ед. числа",
+    "inputs": [
+      "ты",
+      "тебе",
+      "тебя",
+      "тобой",
+      "твой",
+      "твоя",
+      "твоё",
+      "твое",
+      "твои"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Ни",
+    "part": "местоимение",
+    "ru": [
+      "вы",
+      "вам",
+      "вас"
+    ],
+    "base": "",
+    "note": "2 лицо мн. числа",
+    "inputs": [
+      "вы",
+      "вам",
+      "вас",
+      "ваш",
+      "ваша",
+      "ваше",
+      "ваши"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Наву",
+    "part": "местоимение",
+    "ru": [
+      "мы",
+      "нам",
+      "нас"
+    ],
+    "base": "",
+    "note": "1 лицо мн. числа",
+    "inputs": [
+      "мы",
+      "нам",
+      "нас",
+      "нами",
+      "наш",
+      "наша",
+      "наше",
+      "наши"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Уэка",
+    "part": "местоимение",
+    "ru": [
+      "он",
+      "она",
+      "оно",
+      "его",
+      "её"
+    ],
+    "base": "",
+    "note": "3 лицо ед. числа, род не различается",
+    "inputs": [
+      "он",
+      "она",
+      "оно",
+      "его",
+      "ее",
+      "её",
+      "ему",
+      "ей",
+      "им",
+      "ней",
+      "ним"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Фуп",
+    "part": "местоимение",
+    "ru": [
+      "они",
+      "их",
+      "им"
+    ],
+    "base": "",
+    "note": "3 лицо мн. числа",
+    "inputs": [
+      "они",
+      "их",
+      "им",
+      "ими"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пи",
+    "part": "частица",
+    "ru": [
+      "нет",
+      "не"
+    ],
+    "base": "",
+    "note": "отрицание",
+    "inputs": [
+      "нет",
+      "не",
+      "ни"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Па",
+    "part": "частица / ответ",
+    "ru": [
+      "да"
+    ],
+    "base": "",
+    "note": "утверждение",
+    "inputs": [
+      "да"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Оп",
+    "part": "частица / ответ",
+    "ru": [
+      "ок",
+      "хорошо"
+    ],
+    "base": "",
+    "note": "согласие",
+    "inputs": [
+      "ок",
+      "okay",
+      "хорошо",
+      "ладно"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Упу",
+    "part": "частица / ответ",
+    "ru": [
+      "угу",
+      "ага",
+      "да"
+    ],
+    "base": "",
+    "note": "разговорное подтверждение",
+    "inputs": [
+      "угу",
+      "ага"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Но",
+    "part": "вопросительная частица",
+    "ru": [
+      "вопрос"
+    ],
+    "base": "",
+    "note": "ставится в конце вопроса: ... но?",
+    "inputs": [],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Ипи",
+    "part": "союз",
+    "ru": [
+      "и"
+    ],
+    "base": "",
+    "note": "соединение",
+    "inputs": [
+      "и"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Йиль",
+    "part": "союз",
+    "ru": [
+      "или"
+    ],
+    "base": "",
+    "note": "выбор",
+    "inputs": [
+      "или",
+      "либо"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Со",
+    "part": "союз",
+    "ru": [
+      "но"
+    ],
+    "base": "",
+    "note": "противопоставление",
+    "inputs": [
+      "но",
+      "однако"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Си",
+    "part": "предлог",
+    "ru": [
+      "с",
+      "со"
+    ],
+    "base": "",
+    "note": "предлог",
+    "inputs": [
+      "с",
+      "со"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Тил",
+    "part": "предлог",
+    "ru": [
+      "в",
+      "во"
+    ],
+    "base": "",
+    "note": "предлог места/направления",
+    "inputs": [
+      "в",
+      "во"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Дип",
+    "part": "предлог",
+    "ru": [
+      "на"
+    ],
+    "base": "",
+    "note": "предлог",
+    "inputs": [
+      "на"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Ику",
+    "part": "предлог",
+    "ru": [
+      "у"
+    ],
+    "base": "",
+    "note": "предлог",
+    "inputs": [
+      "у"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пабол",
+    "part": "предлог",
+    "ru": [
+      "под"
+    ],
+    "base": "",
+    "note": "предлог",
+    "inputs": [
+      "под"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пропиу",
+    "part": "предлог",
+    "ru": [
+      "про",
+      "о",
+      "об"
+    ],
+    "base": "",
+    "note": "тема разговора",
+    "inputs": [
+      "про",
+      "о",
+      "об",
+      "обо"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Тилка",
+    "part": "предлог / наречие",
+    "ru": [
+      "через"
+    ],
+    "base": "",
+    "note": "переход/время",
+    "inputs": [
+      "через"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Лан",
+    "part": "временная частица",
+    "ru": [
+      "прошлое время"
+    ],
+    "base": "",
+    "note": "ставится перед глаголом",
+    "inputs": [
+      "был",
+      "была",
+      "было",
+      "были",
+      "раньше",
+      "вчера",
+      "прошлое",
+      "прошлый",
+      "прошлая"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Вон",
+    "part": "временная частица",
+    "ru": [
+      "будущее время"
+    ],
+    "base": "",
+    "note": "ставится перед глаголом",
+    "inputs": [
+      "буду",
+      "будешь",
+      "будет",
+      "будем",
+      "будете",
+      "будут",
+      "будущий",
+      "будущая",
+      "будущее"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Ап",
+    "part": "модальное слово",
+    "ru": [
+      "может"
+    ],
+    "base": "",
+    "note": "возможность",
+    "inputs": [
+      "может",
+      "могу",
+      "можешь",
+      "можем",
+      "можете",
+      "могут"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Бап",
+    "part": "модальное слово",
+    "ru": [
+      "возможно",
+      "может быть"
+    ],
+    "base": "",
+    "note": "вероятность",
+    "inputs": [
+      "возможно",
+      "может быть",
+      "можетбыть"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пломи",
+    "part": "модальное слово",
+    "ru": [
+      "можно"
+    ],
+    "base": "",
+    "note": "разрешение",
+    "inputs": [
+      "можно",
+      "разрешено"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Мапи",
+    "part": "наречие / степень",
+    "ru": [
+      "лучше"
+    ],
+    "base": "",
+    "note": "сравнение",
+    "inputs": [
+      "лучше"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Эп",
+    "part": "частица / состояние",
+    "ru": [
+      "пофиг",
+      "всё равно",
+      "без разницы"
+    ],
+    "base": "",
+    "note": "безразличие",
+    "inputs": [
+      "пофиг",
+      "всё равно",
+      "все равно",
+      "без разницы",
+      "безразницы"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пу",
+    "part": "приветствие",
+    "ru": [
+      "привет",
+      "здравствуйте"
+    ],
+    "base": "",
+    "note": "приветствие",
+    "inputs": [
+      "привет",
+      "здравствуй",
+      "здравствуйте",
+      "хай"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пипака",
+    "part": "прощание",
+    "ru": [
+      "пока",
+      "до свидания"
+    ],
+    "base": "",
+    "note": "прощание",
+    "inputs": [
+      "пока",
+      "до свидания",
+      "досвидания",
+      "прощай"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Бонпа",
+    "part": "фраза",
+    "ru": [
+      "спасибо"
+    ],
+    "base": "",
+    "note": "благодарность",
+    "inputs": [
+      "спасибо",
+      "благодарю"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Сирпа",
+    "part": "вводное слово",
+    "ru": [
+      "кстати"
+    ],
+    "base": "",
+    "note": "вводное слово",
+    "inputs": [
+      "кстати"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Капипа",
+    "part": "междометие",
+    "ru": [
+      "капец"
+    ],
+    "base": "",
+    "note": "эмоциональная реакция",
+    "inputs": [
+      "капец",
+      "жесть"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Бо",
+    "part": "существительное / состояние",
+    "ru": [
+      "шок"
+    ],
+    "base": "",
+    "note": "сильное удивление",
+    "inputs": [
+      "шок"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Вол",
+    "part": "оценочное слово",
+    "ru": [
+      "молодец",
+      "крутышка"
+    ],
+    "base": "",
+    "note": "похвала",
+    "inputs": [
+      "молодец",
+      "крутышка"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Нап",
+    "part": "наречие времени / основа",
+    "ru": [
+      "сейчас",
+      "настоящий момент"
+    ],
+    "base": "",
+    "note": "может быть основой семьи Нап",
+    "inputs": [
+      "сейчас",
+      "теперь"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Напум",
+    "part": "прилагательное",
+    "ru": [
+      "настоящий",
+      "текущий"
+    ],
+    "base": "Нап",
+    "note": "форма основы + ум",
+    "inputs": [
+      "настоящий",
+      "настоящая",
+      "настоящее",
+      "настоящие",
+      "текущий",
+      "текущая"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Лулаб",
+    "part": "наречие времени",
+    "ru": [
+      "завтра"
+    ],
+    "base": "",
+    "note": "день после сегодняшнего",
+    "inputs": [
+      "завтра"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Лупа",
+    "part": "наречие времени",
+    "ru": [
+      "сегодня"
+    ],
+    "base": "",
+    "note": "текущий день",
+    "inputs": [
+      "сегодня"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Вонбу",
+    "part": "наречие времени",
+    "ru": [
+      "скоро"
+    ],
+    "base": "",
+    "note": "ближайшее будущее",
+    "inputs": [
+      "скоро"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Лилак",
+    "part": "существительное",
+    "ru": [
+      "год"
+    ],
+    "base": "",
+    "note": "время",
+    "inputs": [
+      "год",
+      "года",
+      "году",
+      "годом",
+      "годы",
+      "лет"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Кина",
+    "part": "вопросительное слово",
+    "ru": [
+      "кто"
+    ],
+    "base": "",
+    "note": "вопрос о человеке",
+    "inputs": [
+      "кто",
+      "кого",
+      "кому",
+      "кем"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пэг",
+    "part": "вопросительное слово",
+    "ru": [
+      "где"
+    ],
+    "base": "",
+    "note": "вопрос о месте",
+    "inputs": [
+      "где",
+      "куда",
+      "откуда"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пипука",
+    "part": "вопросительное слово",
+    "ru": [
+      "что"
+    ],
+    "base": "",
+    "note": "вопрос о предмете/событии",
+    "inputs": [
+      "что",
+      "чего",
+      "чему",
+      "чем"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пипукато",
+    "part": "местоимение",
+    "ru": [
+      "что-то",
+      "что-нибудь",
+      "что-либо"
+    ],
+    "base": "",
+    "note": "отдельное слово, не общее правило",
+    "inputs": [
+      "что-то",
+      "чтото",
+      "что-нибудь",
+      "чтонибудь",
+      "что-либо",
+      "чтолибо"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Лоно",
+    "part": "указательное слово",
+    "ru": [
+      "это"
+    ],
+    "base": "",
+    "note": "указание",
+    "inputs": [
+      "это",
+      "этот",
+      "эта",
+      "эти"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пё",
+    "part": "местоимение / обобщение",
+    "ru": [
+      "всё"
+    ],
+    "base": "",
+    "note": "обобщение",
+    "inputs": [
+      "всё",
+      "все"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Упун",
+    "part": "наречие",
+    "ru": [
+      "тоже"
+    ],
+    "base": "",
+    "note": "добавление",
+    "inputs": [
+      "тоже",
+      "также"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пипа",
+    "part": "основа / существительное",
+    "ru": [
+      "лягушка",
+      "жаба",
+      "универсальная разговорная замена неизвестного слова",
+      "груб. мужской половой орган"
+    ],
+    "base": "Пипа",
+    "note": "универсальная основа",
+    "inputs": [
+      "лягушка",
+      "лягушки",
+      "жаба",
+      "жабы",
+      "хуй"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пипаул",
+    "part": "глагол",
+    "ru": [
+      "делать неизвестное действие",
+      "пипать"
+    ],
+    "base": "Пипа",
+    "note": "форма основы + ул",
+    "inputs": [
+      "пипать"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пипаум",
+    "part": "прилагательное",
+    "ru": [
+      "неизвестный",
+      "какой-то",
+      "пипский"
+    ],
+    "base": "Пипа",
+    "note": "форма основы + ум",
+    "inputs": [
+      "неизвестный",
+      "какой-то"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пипао",
+    "part": "наречие / состояние",
+    "ru": [
+      "неизвестным образом",
+      "как-то"
+    ],
+    "base": "Пипа",
+    "note": "форма основы + о",
+    "inputs": [
+      "как-то"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Аплип",
+    "part": "основа / существительное",
+    "ru": [
+      "какашка",
+      "дерьмо",
+      "говно"
+    ],
+    "base": "Аплип",
+    "note": "словарная семья",
+    "inputs": [
+      "какашка",
+      "какашки",
+      "дерьмо",
+      "говно"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Аплипул",
+    "part": "глагол",
+    "ru": [
+      "какать",
+      "срать"
+    ],
+    "base": "Аплип",
+    "note": "форма основы + ул",
+    "inputs": [
+      "какать",
+      "какаю",
+      "какаешь",
+      "какает",
+      "срать",
+      "сру",
+      "срёшь",
+      "срет",
+      "срёт"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {
+      "inf": "какать",
+      "ма": "какаю",
+      "ди": "какаешь",
+      "уэка": "какает",
+      "наву": "какаем",
+      "ни": "какаете",
+      "фуп": "какают",
+      "past": "какал",
+      "futureInf": "какать"
+    },
+    "imperative": "какай",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Аплипум",
+    "part": "прилагательное",
+    "ru": [
+      "дерьмовый",
+      "грязный"
+    ],
+    "base": "Аплип",
+    "note": "форма основы + ум",
+    "inputs": [
+      "дерьмовый",
+      "грязный"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Аплипо",
+    "part": "наречие / состояние",
+    "ru": [
+      "дерьмово"
+    ],
+    "base": "Аплип",
+    "note": "форма основы + о",
+    "inputs": [
+      "дерьмово",
+      "грязно"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Долимб",
+    "part": "основа / существительное",
+    "ru": [
+      "приём пищи",
+      "еда как действие"
+    ],
+    "base": "Долимб",
+    "note": "словарная семья",
+    "inputs": [
+      "приём пищи",
+      "прием пищи",
+      "еда"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Долимбул",
+    "part": "глагол",
+    "ru": [
+      "есть еду",
+      "кушать"
+    ],
+    "base": "Долимб",
+    "note": "форма основы + ул",
+    "inputs": [
+      "есть",
+      "ем",
+      "ешь",
+      "ест",
+      "едим",
+      "едите",
+      "едят",
+      "кушать",
+      "кушаю",
+      "кушаешь",
+      "кушает"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {
+      "inf": "есть",
+      "ма": "ем",
+      "ди": "ешь",
+      "уэка": "ест",
+      "наву": "едим",
+      "ни": "едите",
+      "фуп": "едят",
+      "past": "ел",
+      "futureInf": "есть"
+    },
+    "imperative": "ешь",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Долимбум",
+    "part": "прилагательное",
+    "ru": [
+      "съедобный",
+      "пищевой"
+    ],
+    "base": "Долимб",
+    "note": "форма основы + ум",
+    "inputs": [
+      "съедобный",
+      "пищевой"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Долимбо",
+    "part": "наречие / состояние",
+    "ru": [
+      "съедобно"
+    ],
+    "base": "Долимб",
+    "note": "форма основы + о",
+    "inputs": [],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Луфап",
+    "part": "основа / существительное",
+    "ru": [
+      "любовь",
+      "симпатия"
+    ],
+    "base": "Луфап",
+    "note": "словарная семья",
+    "inputs": [
+      "любовь",
+      "симпатия"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Луфапул",
+    "part": "глагол",
+    "ru": [
+      "любить",
+      "нравиться"
+    ],
+    "base": "Луфап",
+    "note": "форма основы + ул",
+    "inputs": [
+      "любить",
+      "люблю",
+      "любишь",
+      "любит",
+      "любим",
+      "любите",
+      "любят",
+      "нравиться",
+      "нравится",
+      "нравятся"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {
+      "inf": "любить",
+      "ма": "люблю",
+      "ди": "любишь",
+      "уэка": "любит",
+      "наву": "любим",
+      "ни": "любите",
+      "фуп": "любят",
+      "past": "любил",
+      "futureInf": "любить"
+    },
+    "imperative": "люби",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Луфапум",
+    "part": "прилагательное",
+    "ru": [
+      "любимый",
+      "приятный"
+    ],
+    "base": "Луфап",
+    "note": "форма основы + ум",
+    "inputs": [
+      "любимый",
+      "любимая",
+      "любимое",
+      "любимые",
+      "приятный",
+      "приятная",
+      "приятное",
+      "приятные"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Луфапо",
+    "part": "наречие / состояние",
+    "ru": [
+      "приятно",
+      "с любовью"
+    ],
+    "base": "Луфап",
+    "note": "форма основы + о",
+    "inputs": [
+      "приятно"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Маин",
+    "part": "основа / существительное",
+    "ru": [
+      "понимание"
+    ],
+    "base": "Маин",
+    "note": "словарная семья",
+    "inputs": [
+      "понимание"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Маинул",
+    "part": "глагол",
+    "ru": [
+      "понимать"
+    ],
+    "base": "Маин",
+    "note": "форма основы + ул",
+    "inputs": [
+      "понимать",
+      "понимаю",
+      "понимаешь",
+      "понимает",
+      "понимаем",
+      "понимаете",
+      "понимают",
+      "понять"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {
+      "inf": "понимать",
+      "ма": "понимаю",
+      "ди": "понимаешь",
+      "уэка": "понимает",
+      "наву": "понимаем",
+      "ни": "понимаете",
+      "фуп": "понимают",
+      "past": "понимал",
+      "futureInf": "понимать"
+    },
+    "imperative": "понимай",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Маинум",
+    "part": "прилагательное",
+    "ru": [
+      "понятный"
+    ],
+    "base": "Маин",
+    "note": "форма основы + ум",
+    "inputs": [
+      "понятный",
+      "понятная",
+      "понятное",
+      "понятные"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Маино",
+    "part": "наречие / состояние",
+    "ru": [
+      "понятно"
+    ],
+    "base": "Маин",
+    "note": "форма основы + о",
+    "inputs": [
+      "понятно"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Нал",
+    "part": "основа / существительное",
+    "ru": [
+      "наличие",
+      "владение"
+    ],
+    "base": "Нал",
+    "note": "словарная семья",
+    "inputs": [
+      "наличие",
+      "владение"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Налул",
+    "part": "глагол",
+    "ru": [
+      "иметь",
+      "иметься",
+      "быть в наличии"
+    ],
+    "base": "Нал",
+    "note": "форма основы + ул",
+    "inputs": [
+      "иметь",
+      "имею",
+      "имеешь",
+      "имеет",
+      "имеем",
+      "имеете",
+      "имеют",
+      "есть"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {
+      "inf": "иметь",
+      "ма": "имею",
+      "ди": "имеешь",
+      "уэка": "имеет",
+      "наву": "имеем",
+      "ни": "имеете",
+      "фуп": "имеют",
+      "past": "имел",
+      "futureInf": "иметь"
+    },
+    "imperative": "имей",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Налум",
+    "part": "прилагательное",
+    "ru": [
+      "имеющий",
+      "наличный",
+      "доступный"
+    ],
+    "base": "Нал",
+    "note": "форма основы + ум",
+    "inputs": [
+      "имеющий",
+      "наличный",
+      "доступный"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Нало",
+    "part": "наречие / состояние",
+    "ru": [
+      "в наличии"
+    ],
+    "base": "Нал",
+    "note": "форма основы + о",
+    "inputs": [
+      "в наличии"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Папир",
+    "part": "основа / существительное",
+    "ru": [
+      "разговор"
+    ],
+    "base": "Папир",
+    "note": "словарная семья",
+    "inputs": [
+      "разговор",
+      "разговора",
+      "разговору"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Папирул",
+    "part": "глагол",
+    "ru": [
+      "говорить",
+      "разговаривать"
+    ],
+    "base": "Папир",
+    "note": "форма основы + ул",
+    "inputs": [
+      "говорить",
+      "говорю",
+      "говоришь",
+      "говорит",
+      "говорим",
+      "говорите",
+      "говорят",
+      "разговаривать",
+      "разговариваю",
+      "разговариваешь"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {
+      "inf": "говорить",
+      "ма": "говорю",
+      "ди": "говоришь",
+      "уэка": "говорит",
+      "наву": "говорим",
+      "ни": "говорите",
+      "фуп": "говорят",
+      "past": "говорил",
+      "futureInf": "говорить"
+    },
+    "imperative": "говори",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Папирум",
+    "part": "прилагательное",
+    "ru": [
+      "разговорный"
+    ],
+    "base": "Папир",
+    "note": "форма основы + ум",
+    "inputs": [
+      "разговорный",
+      "разговорная",
+      "разговорное"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Папиро",
+    "part": "наречие / состояние",
+    "ru": [
+      "разговорно"
+    ],
+    "base": "Папир",
+    "note": "форма основы + о",
+    "inputs": [
+      "разговорно"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пелм",
+    "part": "основа / существительное",
+    "ru": [
+      "дача",
+      "передача"
+    ],
+    "base": "Пелм",
+    "note": "словарная семья",
+    "inputs": [
+      "дача",
+      "передача"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пелмул",
+    "part": "глагол",
+    "ru": [
+      "дать",
+      "давать"
+    ],
+    "base": "Пелм",
+    "note": "форма основы + ул",
+    "inputs": [
+      "дать",
+      "давать",
+      "даю",
+      "даёшь",
+      "даешь",
+      "дает",
+      "даёт",
+      "дадим",
+      "дадут"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {
+      "inf": "давать",
+      "ма": "даю",
+      "ди": "даёшь",
+      "уэка": "даёт",
+      "наву": "даём",
+      "ни": "даёте",
+      "фуп": "дают",
+      "past": "давал",
+      "futureInf": "давать"
+    },
+    "imperative": "дай",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пелмум",
+    "part": "прилагательное",
+    "ru": [
+      "данный",
+      "переданный"
+    ],
+    "base": "Пелм",
+    "note": "форма основы + ум",
+    "inputs": [
+      "данный",
+      "переданный"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пелмо",
+    "part": "наречие / состояние",
+    "ru": [
+      "переданно"
+    ],
+    "base": "Пелм",
+    "note": "форма основы + о",
+    "inputs": [],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пеп",
+    "part": "основа / существительное",
+    "ru": [
+      "раздражение",
+      "бесячесть"
+    ],
+    "base": "Пеп",
+    "note": "словарная семья",
+    "inputs": [
+      "раздражение"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пепул",
+    "part": "глагол",
+    "ru": [
+      "бесить",
+      "раздражать"
+    ],
+    "base": "Пеп",
+    "note": "форма основы + ул",
+    "inputs": [
+      "бесить",
+      "бесит",
+      "бесят",
+      "раздражать",
+      "раздражает",
+      "раздражают"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {
+      "inf": "бесить",
+      "ма": "бешу",
+      "ди": "бесишь",
+      "уэка": "бесит",
+      "наву": "бесим",
+      "ни": "бесите",
+      "фуп": "бесят",
+      "past": "бесил",
+      "futureInf": "бесить"
+    },
+    "imperative": "беси",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пепум",
+    "part": "прилагательное",
+    "ru": [
+      "бесящий",
+      "раздражающий"
+    ],
+    "base": "Пеп",
+    "note": "форма основы + ум",
+    "inputs": [
+      "бесящий",
+      "раздражающий"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пепо",
+    "part": "наречие / состояние",
+    "ru": [
+      "раздражающе"
+    ],
+    "base": "Пеп",
+    "note": "форма основы + о",
+    "inputs": [
+      "раздражающе"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пипоп",
+    "part": "основа / существительное",
+    "ru": [
+      "отставание",
+      "отцепление"
+    ],
+    "base": "Пипоп",
+    "note": "словарная семья",
+    "inputs": [
+      "отставание"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пипопул",
+    "part": "глагол",
+    "ru": [
+      "отстать",
+      "отцепиться"
+    ],
+    "base": "Пипоп",
+    "note": "форма основы + ул",
+    "inputs": [
+      "отстать",
+      "отстань",
+      "отцепиться",
+      "отцепись"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {
+      "inf": "отстать",
+      "ма": "отстаю",
+      "ди": "отстаёшь",
+      "уэка": "отстаёт",
+      "наву": "отстаём",
+      "ни": "отстаёте",
+      "фуп": "отстают",
+      "past": "отстал",
+      "futureInf": "отстать"
+    },
+    "imperative": "отстань",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пипопум",
+    "part": "прилагательное",
+    "ru": [
+      "отставший",
+      "отцепившийся"
+    ],
+    "base": "Пипоп",
+    "note": "форма основы + ум",
+    "inputs": [
+      "отставший",
+      "отцепившийся"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пирол",
+    "part": "основа / существительное",
+    "ru": [
+      "питьё",
+      "напиток"
+    ],
+    "base": "Пирол",
+    "note": "словарная семья",
+    "inputs": [
+      "питьё",
+      "питье",
+      "напиток"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пиролул",
+    "part": "глагол",
+    "ru": [
+      "пить"
+    ],
+    "base": "Пирол",
+    "note": "форма основы + ул",
+    "inputs": [
+      "пить",
+      "пью",
+      "пьёшь",
+      "пьешь",
+      "пьет",
+      "пьёт",
+      "пьем",
+      "пьём",
+      "пьют"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {
+      "inf": "пить",
+      "ма": "пью",
+      "ди": "пьёшь",
+      "уэка": "пьёт",
+      "наву": "пьём",
+      "ни": "пьёте",
+      "фуп": "пьют",
+      "past": "пил",
+      "futureInf": "пить"
+    },
+    "imperative": "пей",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пиролум",
+    "part": "прилагательное",
+    "ru": [
+      "питьевой"
+    ],
+    "base": "Пирол",
+    "note": "форма основы + ум",
+    "inputs": [
+      "питьевой",
+      "питьевая",
+      "питьевое"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пироло",
+    "part": "наречие / состояние",
+    "ru": [
+      "питьево"
+    ],
+    "base": "Пирол",
+    "note": "форма основы + о",
+    "inputs": [],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Плим",
+    "part": "основа / существительное",
+    "ru": [
+      "ходьба"
+    ],
+    "base": "Плим",
+    "note": "словарная семья",
+    "inputs": [
+      "ходьба"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Плимул",
+    "part": "глагол",
+    "ru": [
+      "ходить",
+      "идти"
+    ],
+    "base": "Плим",
+    "note": "форма основы + ул",
+    "inputs": [
+      "ходить",
+      "идти",
+      "иду",
+      "идёшь",
+      "идешь",
+      "идет",
+      "идёт",
+      "идем",
+      "идём",
+      "идут",
+      "пойти",
+      "пойду",
+      "пойдешь",
+      "пойдёшь"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {
+      "inf": "идти",
+      "ма": "иду",
+      "ди": "идёшь",
+      "уэка": "идёт",
+      "наву": "идём",
+      "ни": "идёте",
+      "фуп": "идут",
+      "past": "шёл",
+      "futureInf": "идти"
+    },
+    "imperative": "иди",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Плимум",
+    "part": "прилагательное",
+    "ru": [
+      "пеший",
+      "ходячий"
+    ],
+    "base": "Плим",
+    "note": "форма основы + ум",
+    "inputs": [
+      "пеший",
+      "ходячий"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Плимо",
+    "part": "наречие / состояние",
+    "ru": [
+      "пешком"
+    ],
+    "base": "Плим",
+    "note": "форма основы + о",
+    "inputs": [
+      "пешком"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Плоник",
+    "part": "основа / существительное",
+    "ru": [
+      "рвота",
+      "тошнота"
+    ],
+    "base": "Плоник",
+    "note": "словарная семья",
+    "inputs": [
+      "рвота",
+      "тошнота"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Плоникул",
+    "part": "глагол",
+    "ru": [
+      "тошнить"
+    ],
+    "base": "Плоник",
+    "note": "форма основы + ул",
+    "inputs": [
+      "тошнить",
+      "тошнит"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {
+      "inf": "тошнить",
+      "ма": "тошню",
+      "ди": "тошнишь",
+      "уэка": "тошнит",
+      "наву": "тошним",
+      "ни": "тошните",
+      "фуп": "тошнят",
+      "past": "тошнило",
+      "futureInf": "тошнить"
+    },
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Плоникум",
+    "part": "прилагательное",
+    "ru": [
+      "тошнотный"
+    ],
+    "base": "Плоник",
+    "note": "форма основы + ум",
+    "inputs": [
+      "тошнотный"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Плонико",
+    "part": "наречие / состояние",
+    "ru": [
+      "тошнотно"
+    ],
+    "base": "Плоник",
+    "note": "форма основы + о",
+    "inputs": [
+      "тошнотно"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Поп",
+    "part": "основа / существительное",
+    "ru": [
+      "нападение"
+    ],
+    "base": "Поп",
+    "note": "словарная семья",
+    "inputs": [
+      "нападение"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Попул",
+    "part": "глагол",
+    "ru": [
+      "нападать"
+    ],
+    "base": "Поп",
+    "note": "форма основы + ул",
+    "inputs": [
+      "нападать",
+      "нападаю",
+      "нападаешь",
+      "нападает",
+      "нападают",
+      "атаковать",
+      "атакую"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {
+      "inf": "нападать",
+      "ма": "нападаю",
+      "ди": "нападаешь",
+      "уэка": "нападает",
+      "наву": "нападаем",
+      "ни": "нападаете",
+      "фуп": "нападают",
+      "past": "нападал",
+      "futureInf": "нападать"
+    },
+    "imperative": "нападай",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Попум",
+    "part": "прилагательное",
+    "ru": [
+      "нападающий",
+      "агрессивный"
+    ],
+    "base": "Поп",
+    "note": "форма основы + ум",
+    "inputs": [
+      "агрессивный",
+      "нападающий"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Попо",
+    "part": "наречие / состояние",
+    "ru": [
+      "агрессивно"
+    ],
+    "base": "Поп",
+    "note": "форма основы + о",
+    "inputs": [
+      "агрессивно"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пор",
+    "part": "основа / существительное",
+    "ru": [
+      "знание"
+    ],
+    "base": "Пор",
+    "note": "Пор = знание; “знаток” можно передать как Порум бипак",
+    "inputs": [
+      "знание",
+      "знания",
+      "знаток"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Порул",
+    "part": "глагол",
+    "ru": [
+      "знать"
+    ],
+    "base": "Пор",
+    "note": "форма основы + ул",
+    "inputs": [
+      "знать",
+      "знаю",
+      "знаешь",
+      "знает",
+      "знаем",
+      "знаете",
+      "знают"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {
+      "inf": "знать",
+      "ма": "знаю",
+      "ди": "знаешь",
+      "уэка": "знает",
+      "наву": "знаем",
+      "ни": "знаете",
+      "фуп": "знают",
+      "past": "знал",
+      "futureInf": "знать"
+    },
+    "imperative": "знай",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Порум",
+    "part": "прилагательное",
+    "ru": [
+      "знающий",
+      "осведомлённый"
+    ],
+    "base": "Пор",
+    "note": "форма основы + ум",
+    "inputs": [
+      "знающий",
+      "осведомленный",
+      "осведомлённый"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Поро",
+    "part": "наречие / состояние",
+    "ru": [
+      "со знанием"
+    ],
+    "base": "Пор",
+    "note": "форма основы + о",
+    "inputs": [],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пул",
+    "part": "основа / существительное",
+    "ru": [
+      "желание",
+      "хотение"
+    ],
+    "base": "Пул",
+    "note": "словарная семья",
+    "inputs": [
+      "желание",
+      "хотение",
+      "хотелка"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пулул",
+    "part": "глагол",
+    "ru": [
+      "хотеть"
+    ],
+    "base": "Пул",
+    "note": "форма основы + ул",
+    "inputs": [
+      "хотеть",
+      "хочу",
+      "хочешь",
+      "хочет",
+      "хотим",
+      "хотите",
+      "хотят"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {
+      "inf": "хотеть",
+      "ма": "хочу",
+      "ди": "хочешь",
+      "уэка": "хочет",
+      "наву": "хотим",
+      "ни": "хотите",
+      "фуп": "хотят",
+      "past": "хотел",
+      "futureInf": "хотеть"
+    },
+    "imperative": "хоти",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пулум",
+    "part": "прилагательное",
+    "ru": [
+      "желанный",
+      "желаемый"
+    ],
+    "base": "Пул",
+    "note": "форма основы + ум",
+    "inputs": [
+      "желанный",
+      "желаемый"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пуло",
+    "part": "наречие / состояние",
+    "ru": [
+      "желательно"
+    ],
+    "base": "Пул",
+    "note": "форма основы + о",
+    "inputs": [
+      "желательно"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Рипут",
+    "part": "основа / существительное",
+    "ru": [
+      "взгляд",
+      "смотрение"
+    ],
+    "base": "Рипут",
+    "note": "словарная семья",
+    "inputs": [
+      "взгляд",
+      "смотрение"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Рипутул",
+    "part": "глагол",
+    "ru": [
+      "смотреть",
+      "видеть"
+    ],
+    "base": "Рипут",
+    "note": "форма основы + ул",
+    "inputs": [
+      "смотреть",
+      "смотрю",
+      "смотришь",
+      "смотрит",
+      "смотрим",
+      "смотрите",
+      "смотрят",
+      "видеть",
+      "вижу",
+      "видишь",
+      "видит",
+      "видим",
+      "видите",
+      "видят"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {
+      "inf": "смотреть",
+      "ма": "смотрю",
+      "ди": "смотришь",
+      "уэка": "смотрит",
+      "наву": "смотрим",
+      "ни": "смотрите",
+      "фуп": "смотрят",
+      "past": "смотрел",
+      "futureInf": "смотреть"
+    },
+    "imperative": "смотри",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Рипутум",
+    "part": "прилагательное",
+    "ru": [
+      "зрительный",
+      "видимый"
+    ],
+    "base": "Рипут",
+    "note": "форма основы + ум",
+    "inputs": [
+      "зрительный",
+      "видимый"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Рипуто",
+    "part": "наречие / состояние",
+    "ru": [
+      "зрительно"
+    ],
+    "base": "Рипут",
+    "note": "форма основы + о",
+    "inputs": [
+      "зрительно"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Форп",
+    "part": "основа / существительное",
+    "ru": [
+      "игра"
+    ],
+    "base": "Форп",
+    "note": "словарная семья",
+    "inputs": [
+      "игра",
+      "игры",
+      "игру"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Форпул",
+    "part": "глагол",
+    "ru": [
+      "играть"
+    ],
+    "base": "Форп",
+    "note": "форма основы + ул",
+    "inputs": [
+      "играть",
+      "играю",
+      "играешь",
+      "играет",
+      "играем",
+      "играете",
+      "играют"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {
+      "inf": "играть",
+      "ма": "играю",
+      "ди": "играешь",
+      "уэка": "играет",
+      "наву": "играем",
+      "ни": "играете",
+      "фуп": "играют",
+      "past": "играл",
+      "futureInf": "играть"
+    },
+    "imperative": "играй",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Форпум",
+    "part": "прилагательное",
+    "ru": [
+      "игровой"
+    ],
+    "base": "Форп",
+    "note": "форма основы + ум",
+    "inputs": [
+      "игровой",
+      "игровая",
+      "игровое",
+      "игривый"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Форпо",
+    "part": "наречие / состояние",
+    "ru": [
+      "игрово",
+      "игриво"
+    ],
+    "base": "Форп",
+    "note": "форма основы + о",
+    "inputs": [
+      "игриво"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Ханиск",
+    "part": "основа / существительное",
+    "ru": [
+      "сон",
+      "спание"
+    ],
+    "base": "Ханиск",
+    "note": "словарная семья",
+    "inputs": [
+      "сон",
+      "спание"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Ханискул",
+    "part": "глагол",
+    "ru": [
+      "спать"
+    ],
+    "base": "Ханиск",
+    "note": "форма основы + ул",
+    "inputs": [
+      "спать",
+      "сплю",
+      "спишь",
+      "спит",
+      "спим",
+      "спите",
+      "спят"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {
+      "inf": "спать",
+      "ма": "сплю",
+      "ди": "спишь",
+      "уэка": "спит",
+      "наву": "спим",
+      "ни": "спите",
+      "фуп": "спят",
+      "past": "спал",
+      "futureInf": "спать"
+    },
+    "imperative": "спи",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Ханискум",
+    "part": "прилагательное",
+    "ru": [
+      "сонный",
+      "спящий"
+    ],
+    "base": "Ханиск",
+    "note": "форма основы + ум",
+    "inputs": [
+      "сонный",
+      "спящий"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Ханиско",
+    "part": "наречие / состояние",
+    "ru": [
+      "сонно"
+    ],
+    "base": "Ханиск",
+    "note": "форма основы + о",
+    "inputs": [
+      "сонно"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Твип",
+    "part": "основа / существительное",
+    "ru": [
+      "дело",
+      "действие"
+    ],
+    "base": "Твип",
+    "note": "словарная семья",
+    "inputs": [
+      "дело",
+      "действие"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Твипул",
+    "part": "глагол",
+    "ru": [
+      "делать"
+    ],
+    "base": "Твип",
+    "note": "форма основы + ул",
+    "inputs": [
+      "делать",
+      "делаю",
+      "делаешь",
+      "делает",
+      "делаем",
+      "делаете",
+      "делают",
+      "сделать"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {
+      "inf": "делать",
+      "ма": "делаю",
+      "ди": "делаешь",
+      "уэка": "делает",
+      "наву": "делаем",
+      "ни": "делаете",
+      "фуп": "делают",
+      "past": "делал",
+      "futureInf": "делать"
+    },
+    "imperative": "делай",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Твипум",
+    "part": "прилагательное",
+    "ru": [
+      "действенный",
+      "деловой"
+    ],
+    "base": "Твип",
+    "note": "форма основы + ум",
+    "inputs": [
+      "действенный",
+      "деловой"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Твипо",
+    "part": "наречие / состояние",
+    "ru": [
+      "действенно"
+    ],
+    "base": "Твип",
+    "note": "форма основы + о",
+    "inputs": [
+      "действенно"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Лумик",
+    "part": "основа / существительное",
+    "ru": [
+      "извинение",
+      "прощение"
+    ],
+    "base": "Лумик",
+    "note": "словарная семья",
+    "inputs": [
+      "извини",
+      "прости",
+      "извинение",
+      "прощение"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Лумикул",
+    "part": "глагол",
+    "ru": [
+      "извинять",
+      "прощать"
+    ],
+    "base": "Лумик",
+    "note": "форма основы + ул",
+    "inputs": [
+      "извинять",
+      "извиняю",
+      "извиняешь",
+      "прощать",
+      "прощаю",
+      "прощаешь"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {
+      "inf": "прощать",
+      "ма": "прощаю",
+      "ди": "прощаешь",
+      "уэка": "прощает",
+      "наву": "прощаем",
+      "ни": "прощаете",
+      "фуп": "прощают",
+      "past": "прощал",
+      "futureInf": "прощать"
+    },
+    "imperative": "прости",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Лумикум",
+    "part": "прилагательное",
+    "ru": [
+      "простительный",
+      "извинительный"
+    ],
+    "base": "Лумик",
+    "note": "форма основы + ум",
+    "inputs": [
+      "простительный",
+      "извинительный"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Лумико",
+    "part": "наречие / состояние",
+    "ru": [
+      "извинительно"
+    ],
+    "base": "Лумик",
+    "note": "форма основы + о",
+    "inputs": [
+      "извинительно"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Вамл",
+    "part": "основа / существительное",
+    "ru": [
+      "важность"
+    ],
+    "base": "Вамл",
+    "note": "словарная семья",
+    "inputs": [
+      "важность"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Вамлул",
+    "part": "глагол",
+    "ru": [
+      "считать важным",
+      "подчёркивать"
+    ],
+    "base": "Вамл",
+    "note": "форма основы + ул",
+    "inputs": [
+      "считать важным",
+      "подчеркивать",
+      "подчёркивать"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Вамлум",
+    "part": "прилагательное",
+    "ru": [
+      "важный"
+    ],
+    "base": "Вамл",
+    "note": "форма основы + ум",
+    "inputs": [
+      "важный",
+      "важная",
+      "важное",
+      "важные"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Вамло",
+    "part": "наречие / состояние",
+    "ru": [
+      "важно"
+    ],
+    "base": "Вамл",
+    "note": "форма основы + о",
+    "inputs": [
+      "важно"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Вух",
+    "part": "основа / существительное",
+    "ru": [
+      "смех",
+      "смешное"
+    ],
+    "base": "Вух",
+    "note": "словарная семья",
+    "inputs": [
+      "смех"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Вухул",
+    "part": "глагол",
+    "ru": [
+      "смеяться",
+      "смешить"
+    ],
+    "base": "Вух",
+    "note": "форма основы + ул",
+    "inputs": [
+      "смеяться",
+      "смеюсь",
+      "смеёшься",
+      "смеешься",
+      "смешить"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Вухум",
+    "part": "прилагательное",
+    "ru": [
+      "смешной"
+    ],
+    "base": "Вух",
+    "note": "форма основы + ум",
+    "inputs": [
+      "смешной",
+      "смешная",
+      "смешное",
+      "смешные"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Вухо",
+    "part": "наречие / состояние",
+    "ru": [
+      "смешно"
+    ],
+    "base": "Вух",
+    "note": "форма основы + о",
+    "inputs": [
+      "смешно"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пиклип",
+    "part": "основа / существительное",
+    "ru": [
+      "классность",
+      "крутость"
+    ],
+    "base": "Пиклип",
+    "note": "словарная семья",
+    "inputs": [
+      "классность",
+      "крутость"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пиклипул",
+    "part": "глагол",
+    "ru": [
+      "делать классным",
+      "впечатлять"
+    ],
+    "base": "Пиклип",
+    "note": "форма основы + ул",
+    "inputs": [],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пиклипум",
+    "part": "прилагательное",
+    "ru": [
+      "классный",
+      "отличный",
+      "прикольный"
+    ],
+    "base": "Пиклип",
+    "note": "форма основы + ум",
+    "inputs": [
+      "классный",
+      "отличный",
+      "прикольный",
+      "здоровый",
+      "крутой"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пиклипо",
+    "part": "наречие / состояние",
+    "ru": [
+      "классно",
+      "супер",
+      "отлично",
+      "прикольно",
+      "здорово"
+    ],
+    "base": "Пиклип",
+    "note": "форма основы + о",
+    "inputs": [
+      "классно",
+      "супер",
+      "отлично",
+      "прикольно",
+      "здорово",
+      "круто"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Луфанк",
+    "part": "основа / существительное",
+    "ru": [
+      "скука"
+    ],
+    "base": "Луфанк",
+    "note": "словарная семья",
+    "inputs": [
+      "скука",
+      "скукота",
+      "луфанка"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Луфанкул",
+    "part": "глагол",
+    "ru": [
+      "скучать",
+      "надоедать"
+    ],
+    "base": "Луфанк",
+    "note": "форма основы + ул",
+    "inputs": [
+      "скучать",
+      "скучаю",
+      "скучаешь",
+      "надоедать"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Луфанкум",
+    "part": "прилагательное",
+    "ru": [
+      "скучный"
+    ],
+    "base": "Луфанк",
+    "note": "форма основы + ум",
+    "inputs": [
+      "скучный",
+      "скучная",
+      "скучное",
+      "скучные"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Луфанко",
+    "part": "наречие / состояние",
+    "ru": [
+      "скучно"
+    ],
+    "base": "Луфанк",
+    "note": "форма основы + о",
+    "inputs": [
+      "скучно"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Ворта",
+    "part": "основа / существительное",
+    "ru": [
+      "хорошесть",
+      "добро"
+    ],
+    "base": "Ворта",
+    "note": "словарная семья",
+    "inputs": [
+      "добро"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Вортаул",
+    "part": "глагол",
+    "ru": [
+      "улучшать",
+      "становиться хорошим"
+    ],
+    "base": "Ворта",
+    "note": "форма основы + ул",
+    "inputs": [],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Вортаум",
+    "part": "прилагательное",
+    "ru": [
+      "хороший"
+    ],
+    "base": "Ворта",
+    "note": "форма основы + ум",
+    "inputs": [
+      "хороший",
+      "хорошая",
+      "хорошее",
+      "хорошие"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Вортао",
+    "part": "наречие / состояние",
+    "ru": [
+      "хорошо"
+    ],
+    "base": "Ворта",
+    "note": "форма основы + о",
+    "inputs": [
+      "хорошо"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Порта",
+    "part": "основа / существительное",
+    "ru": [
+      "плохость"
+    ],
+    "base": "Порта",
+    "note": "словарная семья",
+    "inputs": [
+      "плохость"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Портаул",
+    "part": "глагол",
+    "ru": [
+      "ухудшать",
+      "портить"
+    ],
+    "base": "Порта",
+    "note": "форма основы + ул",
+    "inputs": [],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Портаум",
+    "part": "прилагательное",
+    "ru": [
+      "плохой"
+    ],
+    "base": "Порта",
+    "note": "форма основы + ум",
+    "inputs": [
+      "плохой",
+      "плохая",
+      "плохое",
+      "плохие"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Портао",
+    "part": "наречие / состояние",
+    "ru": [
+      "плохо"
+    ],
+    "base": "Порта",
+    "note": "форма основы + о",
+    "inputs": [
+      "плохо"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пол",
+    "part": "основа / существительное",
+    "ru": [
+      "большой размер",
+      "величина"
+    ],
+    "base": "Пол",
+    "note": "словарная семья",
+    "inputs": [
+      "размер",
+      "величина"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Полул",
+    "part": "глагол",
+    "ru": [
+      "увеличивать",
+      "расти"
+    ],
+    "base": "Пол",
+    "note": "форма основы + ул",
+    "inputs": [],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Полум",
+    "part": "прилагательное",
+    "ru": [
+      "большой"
+    ],
+    "base": "Пол",
+    "note": "форма основы + ум",
+    "inputs": [
+      "большой",
+      "большая",
+      "большое",
+      "большие"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Поло",
+    "part": "наречие / состояние",
+    "ru": [
+      "большо"
+    ],
+    "base": "Пол",
+    "note": "форма основы + о",
+    "inputs": [],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Волап",
+    "part": "основа / существительное",
+    "ru": [
+      "маленький размер",
+      "малость"
+    ],
+    "base": "Волап",
+    "note": "словарная семья",
+    "inputs": [
+      "малость"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Волапул",
+    "part": "глагол",
+    "ru": [
+      "уменьшать"
+    ],
+    "base": "Волап",
+    "note": "форма основы + ул",
+    "inputs": [],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Волапум",
+    "part": "прилагательное",
+    "ru": [
+      "маленький"
+    ],
+    "base": "Волап",
+    "note": "форма основы + ум",
+    "inputs": [
+      "маленький",
+      "маленькая",
+      "маленькое",
+      "маленькие",
+      "малый"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Волапо",
+    "part": "наречие / состояние",
+    "ru": [
+      "мало"
+    ],
+    "base": "Волап",
+    "note": "форма основы + о",
+    "inputs": [],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пале",
+    "part": "основа / существительное",
+    "ru": [
+      "белизна",
+      "белый цвет"
+    ],
+    "base": "Пале",
+    "note": "словарная семья",
+    "inputs": [
+      "белизна"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Палеул",
+    "part": "глагол",
+    "ru": [
+      "белеть",
+      "белить"
+    ],
+    "base": "Пале",
+    "note": "форма основы + ул",
+    "inputs": [],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Палеум",
+    "part": "прилагательное",
+    "ru": [
+      "белый"
+    ],
+    "base": "Пале",
+    "note": "форма основы + ум",
+    "inputs": [
+      "белый",
+      "белая",
+      "белое",
+      "белые"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Палео",
+    "part": "наречие / состояние",
+    "ru": [
+      "бело"
+    ],
+    "base": "Пале",
+    "note": "форма основы + о",
+    "inputs": [],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Писпе",
+    "part": "основа / существительное",
+    "ru": [
+      "краснота",
+      "красный цвет"
+    ],
+    "base": "Писпе",
+    "note": "словарная семья",
+    "inputs": [
+      "краснота"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Писпеул",
+    "part": "глагол",
+    "ru": [
+      "краснеть",
+      "красить красным"
+    ],
+    "base": "Писпе",
+    "note": "форма основы + ул",
+    "inputs": [],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Писпеум",
+    "part": "прилагательное",
+    "ru": [
+      "красный"
+    ],
+    "base": "Писпе",
+    "note": "форма основы + ум",
+    "inputs": [
+      "красный",
+      "красная",
+      "красное",
+      "красные"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Писпео",
+    "part": "наречие / состояние",
+    "ru": [
+      "красно"
+    ],
+    "base": "Писпе",
+    "note": "форма основы + о",
+    "inputs": [],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пинип",
+    "part": "основа / существительное",
+    "ru": [
+      "синева",
+      "синий цвет"
+    ],
+    "base": "Пинип",
+    "note": "словарная семья",
+    "inputs": [
+      "синева"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пинипул",
+    "part": "глагол",
+    "ru": [
+      "синеть",
+      "красить синим"
+    ],
+    "base": "Пинип",
+    "note": "форма основы + ул",
+    "inputs": [],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пинипум",
+    "part": "прилагательное",
+    "ru": [
+      "синий"
+    ],
+    "base": "Пинип",
+    "note": "форма основы + ум",
+    "inputs": [
+      "синий",
+      "синяя",
+      "синее",
+      "синие"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пинипо",
+    "part": "наречие / состояние",
+    "ru": [
+      "сине"
+    ],
+    "base": "Пинип",
+    "note": "форма основы + о",
+    "inputs": [],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пэлунип",
+    "part": "основа / существительное",
+    "ru": [
+      "зелень",
+      "зелёный цвет"
+    ],
+    "base": "Пэлунип",
+    "note": "словарная семья",
+    "inputs": [
+      "зелень"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пэлунипул",
+    "part": "глагол",
+    "ru": [
+      "зеленеть",
+      "красить зелёным"
+    ],
+    "base": "Пэлунип",
+    "note": "форма основы + ул",
+    "inputs": [],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пэлунипум",
+    "part": "прилагательное",
+    "ru": [
+      "зелёный"
+    ],
+    "base": "Пэлунип",
+    "note": "форма основы + ум",
+    "inputs": [
+      "зелёный",
+      "зеленый",
+      "зелёная",
+      "зеленая",
+      "зелёное",
+      "зеленое",
+      "зелёные",
+      "зеленые"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пэлунипо",
+    "part": "наречие / состояние",
+    "ru": [
+      "зелено"
+    ],
+    "base": "Пэлунип",
+    "note": "форма основы + о",
+    "inputs": [],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пиниле",
+    "part": "основа / существительное",
+    "ru": [
+      "голубой цвет"
+    ],
+    "base": "Пиниле",
+    "note": "словарная семья",
+    "inputs": [],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пинилеул",
+    "part": "глагол",
+    "ru": [
+      "голубеть"
+    ],
+    "base": "Пиниле",
+    "note": "форма основы + ул",
+    "inputs": [],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пинилеум",
+    "part": "прилагательное",
+    "ru": [
+      "голубой"
+    ],
+    "base": "Пиниле",
+    "note": "форма основы + ум",
+    "inputs": [
+      "голубой",
+      "голубая",
+      "голубое",
+      "голубые"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пинилео",
+    "part": "наречие / состояние",
+    "ru": [
+      "голубо"
+    ],
+    "base": "Пиниле",
+    "note": "форма основы + о",
+    "inputs": [],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Писле",
+    "part": "основа / существительное",
+    "ru": [
+      "розовый цвет"
+    ],
+    "base": "Писле",
+    "note": "словарная семья",
+    "inputs": [],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пислеул",
+    "part": "глагол",
+    "ru": [
+      "розоветь"
+    ],
+    "base": "Писле",
+    "note": "форма основы + ул",
+    "inputs": [],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пислеум",
+    "part": "прилагательное",
+    "ru": [
+      "розовый"
+    ],
+    "base": "Писле",
+    "note": "форма основы + ум",
+    "inputs": [
+      "розовый",
+      "розовая",
+      "розовое",
+      "розовые"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пислео",
+    "part": "наречие / состояние",
+    "ru": [
+      "розово"
+    ],
+    "base": "Писле",
+    "note": "форма основы + о",
+    "inputs": [],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Писпунип",
+    "part": "основа / существительное",
+    "ru": [
+      "фиолетовый цвет"
+    ],
+    "base": "Писпунип",
+    "note": "словарная семья",
+    "inputs": [],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Писпунипул",
+    "part": "глагол",
+    "ru": [
+      "фиолетоветь"
+    ],
+    "base": "Писпунип",
+    "note": "форма основы + ул",
+    "inputs": [],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Писпунипум",
+    "part": "прилагательное",
+    "ru": [
+      "фиолетовый"
+    ],
+    "base": "Писпунип",
+    "note": "форма основы + ум",
+    "inputs": [
+      "фиолетовый",
+      "фиолетовая",
+      "фиолетовое",
+      "фиолетовые"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Писпунипо",
+    "part": "наречие / состояние",
+    "ru": [
+      "фиолетово"
+    ],
+    "base": "Писпунип",
+    "note": "форма основы + о",
+    "inputs": [],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Полаг",
+    "part": "основа / существительное",
+    "ru": [
+      "чернота",
+      "чёрный цвет"
+    ],
+    "base": "Полаг",
+    "note": "словарная семья",
+    "inputs": [],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Полагул",
+    "part": "глагол",
+    "ru": [
+      "чернеть"
+    ],
+    "base": "Полаг",
+    "note": "форма основы + ул",
+    "inputs": [],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Полагум",
+    "part": "прилагательное",
+    "ru": [
+      "чёрный"
+    ],
+    "base": "Полаг",
+    "note": "форма основы + ум",
+    "inputs": [
+      "чёрный",
+      "черный",
+      "чёрная",
+      "черная",
+      "чёрное",
+      "черное",
+      "чёрные",
+      "черные"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Полагао",
+    "part": "наречие / состояние",
+    "ru": [
+      "чёрно"
+    ],
+    "base": "Полаг",
+    "note": "форма основы + о",
+    "inputs": [],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Палег",
+    "part": "основа / существительное",
+    "ru": [
+      "серость",
+      "серый цвет"
+    ],
+    "base": "Палег",
+    "note": "словарная семья",
+    "inputs": [],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Палегул",
+    "part": "глагол",
+    "ru": [
+      "сереть"
+    ],
+    "base": "Палег",
+    "note": "форма основы + ул",
+    "inputs": [],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Палегум",
+    "part": "прилагательное",
+    "ru": [
+      "серый"
+    ],
+    "base": "Палег",
+    "note": "форма основы + ум",
+    "inputs": [
+      "серый",
+      "серая",
+      "серое",
+      "серые"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Палего",
+    "part": "наречие / состояние",
+    "ru": [
+      "серо"
+    ],
+    "base": "Палег",
+    "note": "форма основы + о",
+    "inputs": [],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пунил",
+    "part": "основа / существительное",
+    "ru": [
+      "коричневый цвет"
+    ],
+    "base": "Пунил",
+    "note": "словарная семья",
+    "inputs": [],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пунилул",
+    "part": "глагол",
+    "ru": [
+      "коричневеть"
+    ],
+    "base": "Пунил",
+    "note": "форма основы + ул",
+    "inputs": [],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пунилум",
+    "part": "прилагательное",
+    "ru": [
+      "коричневый"
+    ],
+    "base": "Пунил",
+    "note": "форма основы + ум",
+    "inputs": [
+      "коричневый",
+      "коричневая",
+      "коричневое",
+      "коричневые"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пунило",
+    "part": "наречие / состояние",
+    "ru": [
+      "коричнево"
+    ],
+    "base": "Пунил",
+    "note": "форма основы + о",
+    "inputs": [],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Писл",
+    "part": "основа / существительное",
+    "ru": [
+      "оранжевый цвет"
+    ],
+    "base": "Писл",
+    "note": "словарная семья",
+    "inputs": [],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пислул",
+    "part": "глагол",
+    "ru": [
+      "оранжеветь"
+    ],
+    "base": "Писл",
+    "note": "форма основы + ул",
+    "inputs": [],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пислум",
+    "part": "прилагательное",
+    "ru": [
+      "оранжевый"
+    ],
+    "base": "Писл",
+    "note": "форма основы + ум",
+    "inputs": [
+      "оранжевый",
+      "оранжевая",
+      "оранжевое",
+      "оранжевые"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Писло",
+    "part": "наречие / состояние",
+    "ru": [
+      "оранжево"
+    ],
+    "base": "Писл",
+    "note": "форма основы + о",
+    "inputs": [],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пян",
+    "part": "основа / существительное",
+    "ru": [
+      "милота"
+    ],
+    "base": "Пян",
+    "note": "словарная семья",
+    "inputs": [
+      "милота"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пянул",
+    "part": "глагол",
+    "ru": [
+      "милеть",
+      "умилять"
+    ],
+    "base": "Пян",
+    "note": "форма основы + ул",
+    "inputs": [],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пянум",
+    "part": "прилагательное",
+    "ru": [
+      "милый"
+    ],
+    "base": "Пян",
+    "note": "форма основы + ум",
+    "inputs": [
+      "милый",
+      "милая",
+      "милое",
+      "милые"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пяно",
+    "part": "наречие / состояние",
+    "ru": [
+      "мило"
+    ],
+    "base": "Пян",
+    "note": "форма основы + о",
+    "inputs": [
+      "мило"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Анпак",
+    "part": "существительное",
+    "ru": [
+      "обжора"
+    ],
+    "base": "",
+    "note": "",
+    "inputs": [
+      "обжора",
+      "обжоры"
+    ],
+    "ruPlural": "обжоры",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Апа",
+    "part": "существительное",
+    "ru": [
+      "яблоко"
+    ],
+    "base": "",
+    "note": "",
+    "inputs": [
+      "яблоко",
+      "яблока",
+      "яблоку",
+      "яблоком",
+      "яблоке",
+      "яблоки",
+      "яблок"
+    ],
+    "ruPlural": "яблоки",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Апаклип",
+    "part": "существительное",
+    "ru": [
+      "апельсин"
+    ],
+    "base": "",
+    "note": "",
+    "inputs": [
+      "апельсин",
+      "апельсина",
+      "апельсину",
+      "апельсином",
+      "апельсины"
+    ],
+    "ruPlural": "апельсины",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Ату",
+    "part": "существительное",
+    "ru": [
+      "сперма"
+    ],
+    "base": "",
+    "note": "",
+    "inputs": [
+      "сперма",
+      "спермы",
+      "сперму"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Беп",
+    "part": "существительное / оценка",
+    "ru": [
+      "лох"
+    ],
+    "base": "",
+    "note": "",
+    "inputs": [
+      "лох",
+      "лоха",
+      "лохи"
+    ],
+    "ruPlural": "лохи",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Фоп",
+    "part": "существительное / оценка",
+    "ru": [
+      "чмо"
+    ],
+    "base": "",
+    "note": "",
+    "inputs": [
+      "чмо"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Бипак",
+    "part": "существительное",
+    "ru": [
+      "человек"
+    ],
+    "base": "",
+    "note": "",
+    "inputs": [
+      "человек",
+      "человека",
+      "человеку",
+      "человеком",
+      "человеке",
+      "люди",
+      "людей",
+      "людям",
+      "людьми",
+      "людях"
+    ],
+    "ruPlural": "люди",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Болип",
+    "part": "существительное",
+    "ru": [
+      "враг",
+      "противник"
+    ],
+    "base": "",
+    "note": "",
+    "inputs": [
+      "враг",
+      "врага",
+      "врагу",
+      "врагом",
+      "враги",
+      "противник",
+      "противника",
+      "противники"
+    ],
+    "ruPlural": "враги",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Болупфа",
+    "part": "существительное",
+    "ru": [
+      "баклажан"
+    ],
+    "base": "",
+    "note": "",
+    "inputs": [
+      "баклажан",
+      "баклажана",
+      "баклажаны"
+    ],
+    "ruPlural": "баклажаны",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Бупак",
+    "part": "существительное",
+    "ru": [
+      "банан"
+    ],
+    "base": "",
+    "note": "",
+    "inputs": [
+      "банан",
+      "банана",
+      "бананы"
+    ],
+    "ruPlural": "бананы",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Вэлай",
+    "part": "существительное",
+    "ru": [
+      "война"
+    ],
+    "base": "",
+    "note": "",
+    "inputs": [
+      "война",
+      "войны",
+      "войне",
+      "войну",
+      "войной"
+    ],
+    "ruPlural": "войны",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Дилу",
+    "part": "существительное",
+    "ru": [
+      "друг"
+    ],
+    "base": "",
+    "note": "",
+    "inputs": [
+      "друг",
+      "друга",
+      "другу",
+      "другом",
+      "друзья",
+      "друзей",
+      "друзьям",
+      "друзьями"
+    ],
+    "ruPlural": "друзья",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Дорайт",
+    "part": "существительное",
+    "ru": [
+      "кровать"
+    ],
+    "base": "",
+    "note": "",
+    "inputs": [
+      "кровать",
+      "кровати",
+      "кроватью"
+    ],
+    "ruPlural": "кровати",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Капак",
+    "part": "существительное",
+    "ru": [
+      "лук"
+    ],
+    "base": "",
+    "note": "лук как еда, не оружие",
+    "inputs": [
+      "лук",
+      "лука",
+      "луку",
+      "луком",
+      "луке"
+    ],
+    "ruPlural": "",
+    "sense": "еда, овощ",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": [
+      "стрел",
+      "оруж",
+      "тетив",
+      "лук-оружие"
+    ]
+  },
+  {
+    "p": "Кипак",
+    "part": "существительное",
+    "ru": [
+      "груша"
+    ],
+    "base": "",
+    "note": "",
+    "inputs": [
+      "груша",
+      "груши",
+      "грушу",
+      "грушей"
+    ],
+    "ruPlural": "груши",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Клубак",
+    "part": "существительное",
+    "ru": [
+      "луна"
+    ],
+    "base": "",
+    "note": "",
+    "inputs": [
+      "луна",
+      "луны",
+      "луне",
+      "луну",
+      "луной"
+    ],
+    "ruPlural": "луны",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Кутак",
+    "part": "существительное",
+    "ru": [
+      "вода"
+    ],
+    "base": "",
+    "note": "",
+    "inputs": [
+      "вода",
+      "воды",
+      "воде",
+      "воду",
+      "водой"
+    ],
+    "ruPlural": "воды",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Лимлока",
+    "part": "существительное",
+    "ru": [
+      "земля"
+    ],
+    "base": "",
+    "note": "",
+    "inputs": [
+      "земля",
+      "земли",
+      "землю",
+      "землёй",
+      "землей"
+    ],
+    "ruPlural": "земли",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Липез",
+    "part": "существительное",
+    "ru": [
+      "железо"
+    ],
+    "base": "",
+    "note": "",
+    "inputs": [
+      "железо",
+      "железа",
+      "железу",
+      "железом"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Липак",
+    "part": "существительное",
+    "ru": [
+      "гора"
+    ],
+    "base": "",
+    "note": "",
+    "inputs": [
+      "гора",
+      "горы",
+      "гору",
+      "горой",
+      "горе"
+    ],
+    "ruPlural": "горы",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Лопип",
+    "part": "существительное",
+    "ru": [
+      "школа"
+    ],
+    "base": "",
+    "note": "",
+    "inputs": [
+      "школа",
+      "школы",
+      "школу",
+      "школой",
+      "школе"
+    ],
+    "ruPlural": "школы",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Луп",
+    "part": "существительное",
+    "ru": [
+      "лень"
+    ],
+    "base": "",
+    "note": "",
+    "inputs": [
+      "лень",
+      "лени",
+      "ленью"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Мичумба",
+    "part": "существительное",
+    "ru": [
+      "молоко"
+    ],
+    "base": "",
+    "note": "",
+    "inputs": [
+      "молоко",
+      "молока",
+      "молоку",
+      "молоком"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Малон",
+    "part": "существительное",
+    "ru": [
+      "мир"
+    ],
+    "base": "",
+    "note": "мир как мир/покой по контексту",
+    "inputs": [
+      "мир",
+      "мира",
+      "миру",
+      "миром",
+      "мире"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Напак",
+    "part": "существительное",
+    "ru": [
+      "попа",
+      "жопа",
+      "ягодицы"
+    ],
+    "base": "",
+    "note": "",
+    "inputs": [
+      "попа",
+      "попы",
+      "попу",
+      "жопа",
+      "жопы",
+      "жопу",
+      "ягодицы"
+    ],
+    "ruPlural": "ягодицы",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Паолока",
+    "part": "существительное",
+    "ru": [
+      "страна"
+    ],
+    "base": "",
+    "note": "",
+    "inputs": [
+      "страна",
+      "страны",
+      "страну",
+      "страной",
+      "стране"
+    ],
+    "ruPlural": "страны",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пелиун",
+    "part": "существительное",
+    "ru": [
+      "язык"
+    ],
+    "base": "",
+    "note": "",
+    "inputs": [
+      "язык",
+      "языка",
+      "языку",
+      "языком",
+      "языке",
+      "языки"
+    ],
+    "ruPlural": "языки",
+    "sense": "русский/английский и т.п.; не орган",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Паплока",
+    "part": "существительное",
+    "ru": [
+      "глаз"
+    ],
+    "base": "",
+    "note": "",
+    "inputs": [
+      "глаз",
+      "глаза",
+      "глазу",
+      "глазом",
+      "глазе"
+    ],
+    "ruPlural": "глаза",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пилаз",
+    "part": "существительное",
+    "ru": [
+      "алмаз"
+    ],
+    "base": "",
+    "note": "",
+    "inputs": [
+      "алмаз",
+      "алмаза",
+      "алмазы"
+    ],
+    "ruPlural": "алмазы",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пилимилин",
+    "part": "существительное",
+    "ru": [
+      "огурец"
+    ],
+    "base": "",
+    "note": "",
+    "inputs": [
+      "огурец",
+      "огурца",
+      "огурцу",
+      "огурцом",
+      "огурцы"
+    ],
+    "ruPlural": "огурцы",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Плапика",
+    "part": "существительное",
+    "ru": [
+      "кровь"
+    ],
+    "base": "",
+    "note": "",
+    "inputs": [
+      "кровь",
+      "крови",
+      "кровью"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Плиба",
+    "part": "существительное",
+    "ru": [
+      "еда"
+    ],
+    "base": "",
+    "note": "еда как предмет/пища",
+    "inputs": [
+      "еда",
+      "еды",
+      "еду",
+      "едой",
+      "пище",
+      "пища"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Плоп",
+    "part": "существительное",
+    "ru": [
+      "окно"
+    ],
+    "base": "",
+    "note": "",
+    "inputs": [
+      "окно",
+      "окна",
+      "окну",
+      "окном",
+      "окне"
+    ],
+    "ruPlural": "окна",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Полапак",
+    "part": "существительное",
+    "ru": [
+      "город"
+    ],
+    "base": "",
+    "note": "",
+    "inputs": [
+      "город",
+      "города",
+      "городу",
+      "городом",
+      "городе",
+      "городов",
+      "городам"
+    ],
+    "ruPlural": "города",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пэлоз",
+    "part": "существительное",
+    "ru": [
+      "золото"
+    ],
+    "base": "",
+    "note": "",
+    "inputs": [
+      "золото",
+      "золота",
+      "золотом"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пюпа",
+    "part": "существительное",
+    "ru": [
+      "козёл"
+    ],
+    "base": "",
+    "note": "",
+    "inputs": [
+      "козёл",
+      "козел",
+      "козла",
+      "козлу",
+      "козлом",
+      "козлы"
+    ],
+    "ruPlural": "козлы",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Рубап",
+    "part": "существительное",
+    "ru": [
+      "лес"
+    ],
+    "base": "",
+    "note": "",
+    "inputs": [
+      "лес",
+      "леса",
+      "лесу",
+      "лесом",
+      "лесе",
+      "лесов"
+    ],
+    "ruPlural": "леса",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Сапак",
+    "part": "существительное",
+    "ru": [
+      "мясо"
+    ],
+    "base": "",
+    "note": "",
+    "inputs": [
+      "мясо",
+      "мяса",
+      "мясом"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Сельпак",
+    "part": "существительное",
+    "ru": [
+      "небо"
+    ],
+    "base": "",
+    "note": "",
+    "inputs": [
+      "небо",
+      "неба",
+      "небу",
+      "небом"
+    ],
+    "ruPlural": "небеса",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Тулипа",
+    "part": "существительное",
+    "ru": [
+      "помидор"
+    ],
+    "base": "",
+    "note": "",
+    "inputs": [
+      "помидор",
+      "помидора",
+      "помидоры",
+      "томат",
+      "томаты"
+    ],
+    "ruPlural": "помидоры",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Тулипак",
+    "part": "существительное",
+    "ru": [
+      "яма"
+    ],
+    "base": "",
+    "note": "",
+    "inputs": [
+      "яма",
+      "ямы",
+      "яму",
+      "ямой",
+      "яме"
+    ],
+    "ruPlural": "ямы",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Тулок",
+    "part": "существительное",
+    "ru": [
+      "картошка"
+    ],
+    "base": "",
+    "note": "",
+    "inputs": [
+      "картошка",
+      "картошки",
+      "картошку",
+      "картофель"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Турупак",
+    "part": "существительное",
+    "ru": [
+      "гость"
+    ],
+    "base": "",
+    "note": "",
+    "inputs": [
+      "гость",
+      "гостя",
+      "гостю",
+      "гостем",
+      "гости",
+      "гостей"
+    ],
+    "ruPlural": "гости",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Фупу",
+    "part": "существительное",
+    "ru": [
+      "аниме"
+    ],
+    "base": "",
+    "note": "",
+    "inputs": [
+      "аниме"
+    ],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Фупак",
+    "part": "существительное",
+    "ru": [
+      "анимешник"
+    ],
+    "base": "",
+    "note": "",
+    "inputs": [
+      "анимешник",
+      "анимешника",
+      "анимешники"
+    ],
+    "ruPlural": "анимешники",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пислок",
+    "part": "существительное",
+    "ru": [
+      "туалет",
+      "унитаз"
+    ],
+    "base": "",
+    "note": "",
+    "inputs": [
+      "туалет",
+      "туалета",
+      "туалету",
+      "туалетом",
+      "унитаз",
+      "унитаза"
+    ],
+    "ruPlural": "туалеты",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Пурик",
+    "part": "существительное",
+    "ru": [
+      "кот"
+    ],
+    "base": "",
+    "note": "",
+    "inputs": [
+      "кот",
+      "кота",
+      "коту",
+      "котом",
+      "кошки",
+      "кошка",
+      "кошку",
+      "коты"
+    ],
+    "ruPlural": "коты",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Фурако",
+    "part": "существительное",
+    "ru": [
+      "собака"
+    ],
+    "base": "",
+    "note": "",
+    "inputs": [
+      "собака",
+      "собаки",
+      "собаку",
+      "собакой",
+      "пёс",
+      "пес",
+      "пса"
+    ],
+    "ruPlural": "собаки",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Напул",
+    "part": "старая форма",
+    "ru": [
+      "иметь"
+    ],
+    "base": "",
+    "note": "старая форма из чернового словаря; в нормализованной версии заменено на Налул",
+    "inputs": [],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  },
+  {
+    "p": "Луфанка",
+    "part": "старая форма",
+    "ru": [
+      "скучно",
+      "скука"
+    ],
+    "base": "",
+    "note": "старая форма из чернового словаря; в нормализованной версии заменено на Луфанк/Луфанко",
+    "inputs": [],
+    "ruPlural": "",
+    "sense": "",
+    "pAliases": [],
+    "tags": [],
+    "conjugation": {},
+    "imperative": "",
+    "output": "",
+    "hidden": false,
+    "contextBlock": []
+  }
+];
 
-    searchInput.addEventListener("input", function () {
-      const query = searchInput.value.toLowerCase();
+    const VOWELS = 'аеёиоуыэюя';
+    const PLURAL_LIGHT_VOWELS = 'аяоёэеиыю';
+    const SUBJECTS = new Set(['ма', 'ди', 'ни', 'наву', 'уэка', 'фуп']);
+    const PUNCT = new Set(['.', ',', '!', '?', ':', ';', '…']);
 
-      for (let row of rows) {
-        const text = row.textContent.toLowerCase();
-        row.style.display = text.includes(query) ? "" : "none";
+    function normalizeRu(text) {
+      return String(text || '').toLowerCase().replaceAll('ё', 'е').trim();
+    }
+
+    function normalizeP(text) {
+      return String(text || '').toLowerCase().trim();
+    }
+
+    function capFirst(text) {
+      if (!text) return text;
+      return text.charAt(0).toUpperCase() + text.slice(1);
+    }
+
+    function tokenize(text) {
+      return String(text || '').match(/[А-Яа-яЁёA-Za-z]+|[0-9]+|[^\s]/g) || [];
+    }
+
+    function untokenize(tokens) {
+      return tokens.join(' ')
+        .replace(/\s+([,.!?;:])/g, '$1')
+        .replace(/\s+…/g, '…')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    function isWord(token) {
+      return /^[А-Яа-яЁёA-Za-z]+$/.test(token);
+    }
+
+    function makePluralP(word) {
+      const last = normalizeP(word).slice(-1);
+      if (PLURAL_LIGHT_VOWELS.includes(last)) return word + 'л';
+      return word + 'ил';
+    }
+
+    function roughRuForms(word) {
+      const forms = new Set();
+      const w = normalizeRu(word);
+      if (!w || w.includes(' ')) return forms;
+      forms.add(w);
+      const last = w.slice(-1);
+      if (last === 'а') {
+        const stem = w.slice(0, -1);
+        ['ы', 'е', 'у', 'ой', 'ою'].forEach(e => forms.add(stem + e));
+        forms.add(w + 'х');
+      } else if (last === 'я') {
+        const stem = w.slice(0, -1);
+        ['и', 'е', 'ю', 'ей', 'ею'].forEach(e => forms.add(stem + e));
+      } else if (last === 'о' || last === 'е') {
+        const stem = w.slice(0, -1);
+        ['а', 'у', 'ом', 'е'].forEach(e => forms.add(stem + e));
+      } else if (last === 'ь') {
+        const stem = w.slice(0, -1);
+        ['я', 'ю', 'ем', 'е', 'и', 'ей', 'ям', 'ями', 'ях'].forEach(e => forms.add(stem + e));
+      } else if (!VOWELS.includes(last)) {
+        ['а', 'у', 'ом', 'е', 'ы', 'и', 'ов', 'ам', 'ами', 'ах'].forEach(e => forms.add(w + e));
       }
-    });
+      return forms;
+    }
+
+    function buildIndexes() {
+      const pIndex = new Map();
+      const ruIndex = new Map();
+      for (const entry of DICTIONARY) {
+        if (!entry.hidden && !pIndex.has(normalizeP(entry.p))) pIndex.set(normalizeP(entry.p), entry);
+        for (const alias of entry.pAliases || []) {
+          if (!pIndex.has(normalizeP(alias))) pIndex.set(normalizeP(alias), entry);
+        }
+        const ruTerms = [];
+        for (const r of entry.ru || []) {
+          r.split(';').forEach(x => ruTerms.push(x.trim()));
+        }
+        ruTerms.push(...(entry.inputs || []));
+        if (entry.ruPlural) ruTerms.push(entry.ruPlural);
+        for (const term of ruTerms) {
+          const cleaned = normalizeRu(term.replace(/\(.+?\)/g, '').trim());
+          if (!cleaned) continue;
+          addRu(ruIndex, cleaned, entry);
+          for (const f of roughRuForms(cleaned)) addRu(ruIndex, f, entry);
+        }
+      }
+      return { pIndex, ruIndex };
+    }
+
+    function addRu(index, key, entry) {
+      if (!key) return;
+      if (!index.has(key)) index.set(key, []);
+      const arr = index.get(key);
+      if (!arr.includes(entry)) arr.push(entry);
+    }
+
+    const { pIndex, ruIndex } = buildIndexes();
+
+    function chooseCandidate(candidates, originalText) {
+      if (!candidates || !candidates.length) return null;
+      const ctx = normalizeRu(originalText);
+      for (const cand of candidates) {
+        const blocked = cand.contextBlock || [];
+        if (blocked.some(b => ctx.includes(normalizeRu(b)))) continue;
+        return cand;
+      }
+      return null;
+    }
+
+    function detectUnknownRu(token) {
+      const w = normalizeRu(token);
+      if (/^(.*)(ть|ться)$/.test(w) || /(аю|яю|ешь|ишь|ает|яет|ит|ем|им|ете|ите|ут|ют|ат|ят|ал|ала|али|ил|ила|или)$/.test(w)) {
+        return { p: 'Пипаул', label: 'неизвестный глагол' };
+      }
+      if (/(ый|ий|ой|ая|яя|ое|ее|ые|ие|ого|его|ому|ему|ым|им|ую|юю)$/.test(w)) {
+        return { p: 'Пипаум', label: 'неизвестное прилагательное' };
+      }
+      if (/(о|ски|цки)$/.test(w) && w.length > 4) {
+        return { p: 'Пипао', label: 'неизвестное наречие/состояние' };
+      }
+      if (/(ы|и|а|я)$/.test(w) && w.length > 4) {
+        return { p: 'Пипал', label: 'неизвестное множественное существительное' };
+      }
+      return { p: 'Пипа', label: 'неизвестное слово' };
+    }
+
+    function russianToPipskiy(input, unknownMode) {
+      const rawTokens = tokenize(input);
+      const isQuestion = /\?\s*$/.test(input);
+      const output = [];
+      const unknowns = [];
+      const details = [];
+      let i = 0;
+
+      while (i < rawTokens.length) {
+        const tok = rawTokens[i];
+        if (PUNCT.has(tok)) { i++; continue; }
+        if (!isWord(tok)) { output.push(tok); i++; continue; }
+
+        // Longest phrase match: 3, then 2, then 1 word.
+        let matched = null;
+        let matchedLen = 0;
+        for (const len of [3, 2]) {
+          const slice = rawTokens.slice(i, i + len);
+          if (slice.length < len || slice.some(t => !isWord(t))) continue;
+          const phrase = normalizeRu(slice.join(' '));
+          const compact = normalizeRu(slice.join(''));
+          if (ruIndex.has(phrase)) { matched = chooseCandidate(ruIndex.get(phrase), input); matchedLen = len; break; }
+          if (ruIndex.has(compact)) { matched = chooseCandidate(ruIndex.get(compact), input); matchedLen = len; break; }
+        }
+        if (matched) { output.push(matched.p); i += matchedLen; continue; }
+
+        const key = normalizeRu(tok);
+        if (ruIndex.has(key)) {
+          const candidate = chooseCandidate(ruIndex.get(key), input);
+          if (candidate) { output.push(candidate.p); }
+          else {
+            const replacement = unknownMode === 'pipa' ? detectUnknownRu(tok).p : `[${tok}?]`;
+            output.push(replacement);
+            unknowns.push(`${tok} → ${replacement}`);
+          }
+        } else {
+          const unknown = detectUnknownRu(tok);
+          const replacement = unknownMode === 'pipa' ? unknown.p : `[${tok}?]`;
+          output.push(replacement);
+          unknowns.push(`${tok} → ${replacement} (${unknown.label})`);
+        }
+        i++;
+      }
+
+      if (isQuestion) output.push('Но');
+      let result = untokenize(output);
+      if (result) result = capFirst(result);
+      result += isQuestion ? '?' : (/[.!?]$/.test(input.trim()) ? input.trim().slice(-1).replace('?', '') : '.');
+      result = result.replace(/\.\./g, '.');
+
+      if (unknowns.length) details.push('Неизвестные слова: ' + unknowns.join('; '));
+      details.push('Подсказка: переводчик v1 работает по словарю, поэтому сложные русские формы могут переводиться приблизительно.');
+      return { result, details: details.join('\\n') };
+    }
+
+    function detectPipskiyPlural(word) {
+      const key = normalizeP(word);
+      if (key.endsWith('ил')) {
+        const stem = key.slice(0, -2);
+        if (pIndex.has(stem)) return pIndex.get(stem);
+      }
+      if (key.endsWith('л')) {
+        const stem = key.slice(0, -1);
+        const last = stem.slice(-1);
+        if (PLURAL_LIGHT_VOWELS.includes(last) && pIndex.has(stem)) return pIndex.get(stem);
+      }
+      return null;
+    }
+
+    function russianPlural(entry) {
+      if (entry.ruPlural) return entry.ruPlural;
+      const first = (entry.ru && entry.ru[0] ? entry.ru[0].split(';')[0].trim() : 'слова');
+      if (first === 'человек') return 'люди';
+      if (first.endsWith('а')) return first.slice(0, -1) + 'ы';
+      if (first.endsWith('я')) return first.slice(0, -1) + 'и';
+      if (first.endsWith('о')) return first.slice(0, -1) + 'а';
+      return first + 'ы';
+    }
+
+    function futureAux(subjectKey) {
+      const forms = { 'ма': 'буду', 'ди': 'будешь', 'уэка': 'будет', 'наву': 'будем', 'ни': 'будете', 'фуп': 'будут' };
+      return forms[subjectKey] || 'будет';
+    }
+
+    function translateVerbToRu(entry, subjectKey, tense, isImperative) {
+      const conj = entry.conjugation || {};
+      if (isImperative && entry.imperative) return entry.imperative;
+      const inf = conj.inf || (entry.ru && entry.ru[0] ? entry.ru[0].split(';')[0].trim() : 'делать');
+      if (tense === 'future') return futureAux(subjectKey) + ' ' + (conj.futureInf || inf);
+      if (tense === 'past') return conj.past || inf;
+      if (subjectKey && conj[subjectKey]) return conj[subjectKey];
+      return inf;
+    }
+
+    function pipskiyToRussian(input) {
+      const tokens = tokenize(input);
+      const output = [];
+      const literal = [];
+      const details = [];
+      let isQuestion = false;
+      let tense = 'present';
+      let lastSubject = '';
+      let firstWordProcessed = false;
+
+      for (let i = 0; i < tokens.length; i++) {
+        const tok = tokens[i];
+        if (PUNCT.has(tok)) { if (tok === '?') isQuestion = true; continue; }
+        if (!isWord(tok)) { output.push(tok); literal.push(tok); continue; }
+        const key = normalizeP(tok);
+        if (key === 'но') { isQuestion = true; continue; }
+        if (key === 'лан') { tense = 'past'; literal.push('прошлое'); continue; }
+        if (key === 'вон') { tense = 'future'; literal.push('будущее'); continue; }
+
+        let entry = pIndex.get(key);
+        let translated = '';
+        let literalTranslated = '';
+        let wasPlural = false;
+
+        if (!entry) {
+          const pluralEntry = detectPipskiyPlural(tok);
+          if (pluralEntry) {
+            entry = pluralEntry;
+            wasPlural = true;
+          }
+        }
+
+        if (entry) {
+          literalTranslated = wasPlural ? russianPlural(entry) : (entry.ru && entry.ru[0] ? entry.ru[0].split(';')[0].trim() : entry.p);
+          if (entry.part === 'местоимение') {
+            translated = literalTranslated.split(';')[0].trim();
+            lastSubject = key;
+          } else if (entry.part === 'глагол') {
+            const isImperative = !firstWordProcessed && /!\s*$/.test(input);
+            translated = translateVerbToRu(entry, lastSubject, tense, isImperative);
+            tense = 'present';
+          } else if (wasPlural) {
+            translated = russianPlural(entry);
+            lastSubject = 'фуп';
+          } else {
+            translated = literalTranslated;
+            if ((entry.part || '').includes('существительное')) lastSubject = 'уэка';
+          }
+        } else if (key.endsWith('ул')) {
+          translated = 'делать что-то';
+          literalTranslated = 'неизвестный глагол';
+          details.push(`${tok} похоже на глагол, но основы нет в словаре.`);
+        } else if (key.endsWith('ум')) {
+          translated = 'какой-то';
+          literalTranslated = 'неизвестное прилагательное';
+          details.push(`${tok} похоже на прилагательное, но основы нет в словаре.`);
+        } else if (key.endsWith('о')) {
+          translated = 'как-то';
+          literalTranslated = 'неизвестное наречие';
+          details.push(`${tok} похоже на наречие/состояние, но основы нет в словаре.`);
+        } else {
+          translated = `[${tok}?]`;
+          literalTranslated = `[${tok}?]`;
+          details.push(`${tok} не найдено в словаре.`);
+        }
+
+        output.push(translated);
+        literal.push(literalTranslated);
+        firstWordProcessed = true;
+      }
+
+      let result = untokenize(output);
+      if (result) result = capFirst(result);
+      result += isQuestion ? '?' : (/[.!?]$/.test(input.trim()) ? input.trim().slice(-1).replace('?', '') : '.');
+      const literalResult = untokenize(literal);
+      details.unshift('Буквально: ' + (literalResult || '—'));
+      if (isQuestion) details.push('Найден вопросительный маркер Но.');
+      return { result, details: details.join('\\n') };
+    }
+
+    function translate() {
+      const direction = document.getElementById('direction').value;
+      const input = document.getElementById('translatorInput').value;
+      const unknownMode = document.getElementById('unknownMode').value;
+      const outputEl = document.getElementById('translatorOutput');
+      const detailsEl = document.getElementById('translatorDetails');
+      if (!input.trim()) {
+        outputEl.textContent = 'Введите текст для перевода.';
+        detailsEl.textContent = '';
+        return;
+      }
+      const translated = direction === 'ru-to-pip' ? russianToPipskiy(input, unknownMode) : pipskiyToRussian(input);
+      outputEl.textContent = translated.result;
+      detailsEl.textContent = translated.details;
+    }
+
+    function renderDictionary() {
+      const tbody = document.querySelector('#dictionaryTable tbody');
+      tbody.innerHTML = '';
+      const visible = DICTIONARY.filter(e => !e.hidden);
+      for (const entry of visible) {
+        const tr = document.createElement('tr');
+        const meaning = (entry.ru || []).join('; ') + (entry.sense ? ` <span class="pill">${escapeHtml(entry.sense)}</span>` : '');
+        const note = [entry.base ? `основа: ${entry.base}` : '', entry.note || ''].filter(Boolean).join('<br>');
+        tr.innerHTML = `
+          <td><b>${escapeHtml(entry.p)}</b></td>
+          <td>${escapeHtml(entry.part)}</td>
+          <td>${meaning}</td>
+          <td>${note}</td>
+        `;
+        tbody.appendChild(tr);
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value || '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function filterDictionary() {
+      const query = normalizeRu(document.getElementById('dictionarySearch').value);
+      const rows = document.querySelectorAll('#dictionaryTable tbody tr');
+      for (const row of rows) {
+        const text = normalizeRu(row.textContent);
+        row.style.display = text.includes(query) ? '' : 'none';
+      }
+    }
 
     function sortTable(columnIndex) {
+      const table = document.getElementById('dictionaryTable');
       const tbody = table.tBodies[0];
-      const rowsArray = Array.from(tbody.rows);
-
-      rowsArray.sort(function (a, b) {
-        const textA = a.cells[columnIndex].textContent.trim().toLowerCase();
-        const textB = b.cells[columnIndex].textContent.trim().toLowerCase();
-
-        return textA.localeCompare(textB, "ru");
+      const rows = Array.from(tbody.rows);
+      const current = table.dataset.sortColumn === String(columnIndex) ? table.dataset.sortDirection : 'desc';
+      const direction = current === 'asc' ? 'desc' : 'asc';
+      rows.sort((a, b) => {
+        const aa = a.cells[columnIndex].textContent.trim().toLowerCase();
+        const bb = b.cells[columnIndex].textContent.trim().toLowerCase();
+        return direction === 'asc' ? aa.localeCompare(bb, 'ru') : bb.localeCompare(aa, 'ru');
       });
-
-      rowsArray.forEach(row => tbody.appendChild(row));
+      rows.forEach(r => tbody.appendChild(r));
+      table.dataset.sortColumn = String(columnIndex);
+      table.dataset.sortDirection = direction;
     }
+
+    document.getElementById('translateButton').addEventListener('click', translate);
+    document.getElementById('translatorInput').addEventListener('keydown', (event) => {
+      if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') translate();
+    });
+    document.getElementById('swapButton').addEventListener('click', () => {
+      const direction = document.getElementById('direction');
+      direction.value = direction.value === 'ru-to-pip' ? 'pip-to-ru' : 'ru-to-pip';
+      translate();
+    });
+    document.getElementById('dictionarySearch').addEventListener('input', filterDictionary);
+    document.getElementById('clearSearchButton').addEventListener('click', () => {
+      document.getElementById('dictionarySearch').value = '';
+      filterDictionary();
+    });
+    document.querySelectorAll('#dictionaryTable th').forEach((th, index) => {
+      th.addEventListener('click', () => sortTable(index));
+    });
+
+    renderDictionary();
   </script>
 </body>
 </html>
