@@ -85,7 +85,7 @@
 
     <h2 id="translator">Переводчик</h2>
     <div class="note">
-      <p>Переводчик работает по словарю и правилам. Он не является нейросетевым переводчиком и не выдумывает новые слова. Если слово не найдено, по умолчанию используется форма от <b>пипа</b>.</p>
+      <p>Переводчик работает по словарю и правилам. Он не является нейросетевым переводчиком и не выдумывает новые слова. Если слово не найдено, по умолчанию используется форма от <b>пипа</b>. Перед заменой через <b>пипа</b> переводчик теперь пробует распознать формы и родственные прилагательные от известных основ: например, <code>банановый</code> от <code>банан</code>.</p>
     </div>
 
     <section class="translator">
@@ -6771,6 +6771,84 @@
       return forms;
     }
 
+    function pipAdjectiveFromEntry(entry) {
+      const p = lowerP((entry && (entry.output || entry.p)) || 'пипа');
+      if (p === 'пипа') return 'пипум';
+      if (p.endsWith('ум')) return p;
+      if (p.endsWith('ул')) return p.slice(0, -2) + 'ум';
+      return p + 'ум';
+    }
+
+    function russianDenominalAdjectiveCanonicals(word) {
+      const forms = new Set();
+      const w = normalizeRu(word);
+      if (!w || w.length < 3 || w.includes(' ') || w.includes('-')) return forms;
+      if (RU_SUBJECT_WORDS.has(w) || RU_POSSESSIVE_TO_P.has(w)) return forms;
+      const last = w.slice(-1);
+      const beforeLast = w.slice(0, -1);
+      const consonant = !VOWELS.includes(last) && /^[а-я]+$/.test(w);
+
+      if (consonant) {
+        forms.add(w + 'овый');
+        forms.add(w + 'ный');
+        if (/[гкх]$/.test(w)) forms.add(w.slice(0, -1) + ({'г':'ж','к':'ч','х':'ш'}[last]) + 'ный');
+      } else if (last === 'ь') {
+        forms.add(beforeLast + 'ный');
+        forms.add(beforeLast + 'евый');
+      } else if (last === 'й') {
+        forms.add(beforeLast + 'евый');
+      } else if (last === 'а' || last === 'я') {
+        if (/[гкхжчшщ]$/.test(beforeLast)) forms.add(beforeLast + 'евый');
+        else forms.add(beforeLast + 'овый');
+      } else if (last === 'о') {
+        forms.add(beforeLast + 'овый');
+        if (w.endsWith('око')) forms.add(w.slice(0, -3) + 'очный');
+        else forms.add(beforeLast + 'ной');
+      } else if (last === 'е') {
+        forms.add(beforeLast + 'евый');
+      }
+      if (w.endsWith('ец')) forms.add(w.slice(0, -2) + 'ечный');
+      return forms;
+    }
+
+    function russianDenominalAdjectiveForms(word) {
+      const forms = new Set();
+      for (const canonical of russianDenominalAdjectiveCanonicals(word)) {
+        forms.add(canonical);
+        adjectiveForms(canonical).forEach(f => forms.add(f));
+      }
+      return forms;
+    }
+
+    function firstRussianDenominalAdjective(word) {
+      const canonicals = Array.from(russianDenominalAdjectiveCanonicals(word));
+      return canonicals[0] || normalizeRu(word);
+    }
+
+    function makeDerivedAdjectiveEntry(sourceEntry, sourceTerm) {
+      const derivedP = pipAdjectiveFromEntry(sourceEntry);
+      return {
+        p: derivedP,
+        part: 'прилагательное',
+        ru: [firstRussianDenominalAdjective(sourceTerm)],
+        base: sourceEntry.p,
+        note: 'автоматическая прилагательная форма от «' + sourceTerm + '»',
+        inputs: [],
+        ruPlural: '',
+        sense: '',
+        tags: [],
+        conjugation: {},
+        imperative: '',
+        output: derivedP,
+        hidden: true,
+        pAliases: [],
+        contextBlock: [],
+        sortGroup: '',
+        derivedFromRu: sourceTerm,
+        derivedFromP: sourceEntry.p
+      };
+    }
+
     function roughRuForms(word) {
       const forms = new Set(); const w = normalizeRu(word);
       if (!w) return forms;
@@ -6879,6 +6957,10 @@
             addNounOrAdjectiveForms(ruIndex, cleaned, entry, 'normal');
             if ((entry.part || '').includes('существительное')) {
               for (const pf of ruPluralForms(cleaned)) addRuAllKeys(ruIndex, pf, entry, 'plural', 3);
+              if (!isUniversalPipaEntry(entry)) {
+                const derivedAdjEntry = makeDerivedAdjectiveEntry(entry, cleaned);
+                for (const af of russianDenominalAdjectiveForms(cleaned)) addRuAllKeys(ruIndex, af, derivedAdjEntry, 'derived_adjective', 2);
+              }
             }
           }
         }
@@ -6905,7 +6987,7 @@
       const normKey = normalizeRu(key);
       const filtered = candidates.filter(cand => !(cand.entry.contextBlock || []).some(b => ctx.includes(normalizeRu(b))));
       if (!filtered.length) return null;
-      const rank = {exact: 8, plural: 7, past: 6, future: 6, imperative: 5, verb: 4, normal: 3};
+      const rank = {exact: 8, plural: 7, past: 6, future: 6, imperative: 5, verb: 4, normal: 3, derived_adjective: 2};
       const isImperativeContext = /!\s*$/.test(originalText.trim());
       const scored = filtered.slice().sort((a,b) => {
         const score = cand => {
@@ -7092,25 +7174,57 @@
     }
     function russianToPipskiy(input, unknownMode) {
       const rawTokens = tokenize(input);
-      const isQuestion = /\?\s*$/.test(input) || /(^|\s)ли(\s|\?|$)/i.test(input);
       const segmentForIndex = [];
       const segmentWords = [[]];
+      const segmentQuestions = [false];
       let seg = 0;
       for (let ti = 0; ti < rawTokens.length; ti++) {
         const t = rawTokens[ti];
         segmentForIndex[ti] = seg;
-        if (PUNCT.has(t) && '.!?,;:'.includes(t)) { seg++; segmentWords[seg] = []; continue; }
-        if (isWord(t)) segmentWords[seg].push(normalizeRu(t));
+        if (isWord(t)) {
+          const w = normalizeRu(t);
+          segmentWords[seg].push(w);
+          if (w === 'ли') segmentQuestions[seg] = true;
+          continue;
+        }
+        if (PUNCT.has(t) && '.!?,;:'.includes(t)) {
+          if (t === '?') segmentQuestions[seg] = true;
+          seg++;
+          segmentWords[seg] = [];
+          segmentQuestions[seg] = false;
+        }
       }
+      const isQuestion = segmentQuestions.some(Boolean);
       const segmentFutureCues = segmentWords.map(words => words.some(t => FUTURE_AUX_RU.has(t) || FUTURE_TIME_RU.has(t) || FUTURE_FORM_MAP.has(t)));
       const segmentPastCues = segmentWords.map(words => words.some(t => PAST_TIME_RU.has(t)));
       const outputItems = []; const unknowns = []; const details = [];
+      const derivedNotes = new Set();
       let i = 0; let pendingTense = ''; let preferSingularObjectOnce = false; const verbTimeBySegment = new Set();
       function pushWord(text, part='') { outputItems.push({kind:'word', text, part}); }
       function pushPunct(text) { outputItems.push({kind:'punct', text}); }
+      function segmentIsQuestion(index) { return !!segmentQuestions[index || 0]; }
+      function lastOutputWordIsNo() {
+        for (let j = outputItems.length - 1; j >= 0; j--) {
+          const it = outputItems[j];
+          if (it.kind === 'word') return normalizeP(it.text) === 'но';
+          if (it.kind === 'punct') return false;
+        }
+        return false;
+      }
+      function addQuestionMarkerIfNeeded() { if (!lastOutputWordIsNo()) pushWord('но', 'частица'); }
       while (i < rawTokens.length) {
         const tok = rawTokens[i];
-        if (PUNCT.has(tok)) { pushPunct(tok); if ('.!?,;:'.includes(tok)) pendingTense = ''; i++; continue; }
+        if (PUNCT.has(tok)) {
+          const segIdx = segmentForIndex[i] || 0;
+          if (segmentIsQuestion(segIdx) && '.!?'.includes(tok)) {
+            addQuestionMarkerIfNeeded();
+            pushPunct('?');
+          } else {
+            pushPunct(tok);
+          }
+          if ('.!?,;:'.includes(tok)) pendingTense = '';
+          i++; continue;
+        }
         if (!isWord(tok)) { outputItems.push({kind:'raw', text:tok}); i++; continue; }
         const simpleKey = normalizeRu(tok);
         const havePhrase = possessionHavePhrase(rawTokens, i);
@@ -7160,6 +7274,10 @@
           } else if (entryIsNoun(matched.entry)) {
             preferSingularObjectOnce = false;
           }
+          if (matched.form === 'derived_adjective' && matched.entry && matched.entry.derivedFromRu) {
+            const note = '«' + rawTokens.slice(i, i + matchedLen).join(' ') + '» распознано автоматически как прилагательная форма от «' + matched.entry.derivedFromRu + '» → ' + outputPip(matched.entry, form) + '.';
+            if (!derivedNotes.has(note)) { details.push(note); derivedNotes.add(note); }
+          }
           pushWord(outputPip(matched.entry, form), matched.entry.part || '');
           i += matchedLen; continue;
         }
@@ -7171,25 +7289,22 @@
         unknowns.push(`${tok} → ${rep.text} (${rep.label})`);
         i++;
       }
-      if (isQuestion) pushWord('но', 'частица');
+      const lastRawToken = rawTokens.length ? rawTokens[rawTokens.length - 1] : '';
+      const inputEndsWithSentencePunct = PUNCT.has(lastRawToken) && '.!?'.includes(lastRawToken);
+      if (!inputEndsWithSentencePunct && segmentIsQuestion(seg)) { addQuestionMarkerIfNeeded(); pushPunct('?'); }
       const expanded = outputItems.flatMap(it => {
         if (it.kind === 'word' && String(it.text).includes(' ')) return String(it.text).split(/\s+/).map(x => ({...it, text:x}));
         return [it];
       });
       const reordered = reorderPipskiyItems(expanded);
       let toks = reordered.map(it => it.text);
-      if (isQuestion) {
-        toks = toks.filter(t => t !== '?');
-        if (toks[toks.length-1] !== 'но') toks.push('но');
-        toks.push('?');
-      }
       let result = untokenize(toks);
-      const end = isQuestion ? '?' : (/[.!]$/.test(input.trim()) ? input.trim().slice(-1) : '');
+      const end = !isQuestion && /[.!]$/.test(input.trim()) ? input.trim().slice(-1) : '';
       if (end && !/[.!?]$/.test(result)) result += end;
       result = result.replace(/\s+,/g, ',').replace(/\s+([.!?;:])/g, '$1');
       result = applySentenceCase(input, result);
       if (unknowns.length) details.push('Заменены/не найдены: ' + unknowns.join('; '));
-      details.push('Режим: русский → пипский, словарь + правила форм, времени, притяжания и базового порядка слов. Слова не выдумываются. Используются формы пипа/пипул/пипум/пипал.');
+      details.push('Режим: русский → пипский, словарь + правила форм, автоматическое распознавание родственных прилагательных от существительных, времени, притяжания, вопросов по предложениям и базового порядка слов. Слова не выдумываются: если основа не найдена, используются формы пипа/пипул/пипум/пипал.');
       return {result: result || '—', details: details.join('\n')};
     }
     function detectPipskiyPlural(word) {
@@ -7197,6 +7312,15 @@
       if (key.endsWith('ил')) { const stem = key.slice(0,-2); if (pIndex.has(stem)) return pIndex.get(stem); }
       if (key.endsWith('л')) { const stem = key.slice(0,-1); const last = stem.slice(-1); if (PLURAL_LIGHT_VOWELS.includes(last) && pIndex.has(stem)) return pIndex.get(stem); }
       return null;
+    }
+    function detectPipskiyDerivedAdjective(word) {
+      const key = normalizeP(word);
+      if (!key.endsWith('ум') || key.length <= 2) return null;
+      const baseKey = key.slice(0, -2);
+      const baseEntry = pIndex.get(baseKey);
+      if (!baseEntry || isUniversalPipaEntry(baseEntry)) return null;
+      const sourceTerm = baseEntry.ru && baseEntry.ru[0] ? baseEntry.ru[0].split(';')[0].trim() : baseKey;
+      return makeDerivedAdjectiveEntry(baseEntry, sourceTerm);
     }
     function russianPlural(entry) {
       const first = (entry.ru && entry.ru[0] ? entry.ru[0].split(';')[0].trim() : 'слова');
@@ -7299,6 +7423,10 @@
         let entry = pIndex.get(key); let wasPlural = false;
         if (entry && (entry.part || '').includes('мн.')) wasPlural = true;
         if (!entry) { const pl = detectPipskiyPlural(tok); if (pl) { entry = pl; wasPlural = true; } }
+        if (!entry) {
+          const derivedAdj = detectPipskiyDerivedAdjective(tok);
+          if (derivedAdj) { entry = derivedAdj; details.push(`${tok} распознано как прилагательная форма от основы ${derivedAdj.derivedFromP}.`); }
+        }
         let translated = ''; let lit = ''; let part = ''; let sourceEntry = entry || null; let wasObject = false;
         if (entry) {
           lit = (wasPlural ? russianPlural(entry) : (entry.ru && entry.ru[0] ? entry.ru[0].split(';')[0].trim() : entry.p)).toLowerCase();
