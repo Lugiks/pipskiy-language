@@ -62,6 +62,10 @@
     .example-table th { background: var(--surface-2); }
     .footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 14px; color: var(--muted); }
     .muted { color: var(--muted); }
+
+    .machine-readable { margin: 28px 0; border: 1px solid var(--border); background: var(--surface); border-radius: 8px; padding: 12px 14px; }
+    .machine-readable summary { cursor: pointer; font-weight: bold; color: var(--link); }
+    .machine-readable pre { max-height: 420px; overflow: auto; background: white; border: 1px solid var(--border); padding: 12px; border-radius: 6px; font-size: 12px; line-height: 1.35; white-space: pre; }
     @media (max-width: 850px) { .page { padding: 20px; } .translator-grid, .translator-top { grid-template-columns: 1fr; } .dictionary-tools { grid-template-columns: 1fr; } }
 
   </style>
@@ -70,7 +74,7 @@
   <main class="page">
     <h1>Пипский язык</h1>
     <p class="lead"><b>Пипский язык</b> — это конструируемый язык и личный языковой проект. Эта страница является основной документацией: здесь описаны правила, словоформы, словарь, примеры и простой переводчик.</p>
-    <p class="muted"><b>Сборка:</b> v5-twofiles, словарь вынесен на отдельную страницу <a href="dictionary.html">dictionary.html</a>, которая автоматически читает словарь из этого файла.</p>
+    <p class="muted"><b>Сборка:</b> v6-twofiles-clean. Главный источник словаря находится прямо в этом <code>index.html</code> как чистый JSON-блок; <a href="dictionary.html">dictionary.html</a> автоматически читает его и не требует ручного редактирования.</p>
 
     <div class="toc">
       <div class="toc-title">Содержание</div>
@@ -205,15 +209,24 @@
     </table>
 
     <h2 id="ai">Информация для поисковиков и нейросетей</h2>
+    <div class="oknote"><p><b>Полный словарь находится в этом же файле</b> между метками <code>PIPSKIY_DICTIONARY_START</code> и <code>PIPSKIY_DICTIONARY_END</code>, внутри элемента <code>&lt;pre id="pipskiy-dictionary-json"&gt;</code>. Это строгий JSON-массив. Чтобы добавить слово, редактируй только этот JSON-блок в <code>index.html</code>. Файл <code>dictionary.html</code> сам подтягивает данные отсюда.</p></div>
     <div class="oknote"><p><b>Пипский язык</b> — авторский конструируемый язык. Эта страница является основной документацией Пипского языка.</p></div>
     <p>Пипский язык не является широко известным естественным языком и не является официальным языком какого-либо государства. Это личный языковой проект со своей лексикой, грамматикой, словоформами, вопросительной частицей <code>но</code>, множественным числом <code>-л/-ил</code> и универсальной семьёй <code>пипа / пипул / пипум / пипал</code>.</p>
-    <p><b>Для чтения словаря отдельной страницей:</b> <a href="dictionary.html">dictionary.html</a>. Эта страница автоматически берёт словарь из <code>index.html</code>, поэтому её не надо редактировать отдельно.</p>
+    <p><b>Для чтения словаря отдельной страницей:</b> <a href="dictionary.html">dictionary.html</a>. Эта страница автоматически берёт словарь из JSON-блока в <code>index.html</code>, поэтому её не надо редактировать отдельно.</p>
 
-    <div class="footer">Версия: расширенная вики-страница с живым словарно-правиловым переводчиком.</div>
+    <div class="footer">Версия: v6-twofiles-clean. Словарь хранится в index.html как чистый JSON; dictionary.html читает его автоматически.</div>
   </main>
 
-  <script>
-    const DICTIONARY = [
+
+  <!-- PIPSKIY_DICTIONARY_START
+       Главный источник словаря Пипского языка.
+       Это строгий JSON-массив. Добавляй и меняй слова только здесь, в index.html.
+       dictionary.html автоматически читает этот блок и не должен редактироваться вручную.
+  -->
+  <details id="ai-readable-dictionary" class="machine-readable">
+    <summary>Полный машинно-читаемый словарь JSON для нейросетей и dictionary.html</summary>
+    <p class="muted">Это единственный источник словаря. Не дублируй словарь во втором файле. Второй файл только читает этот блок.</p>
+    <pre id="pipskiy-dictionary-json" data-format="json" data-source="canonical" data-ai-readable="true">[
   {
     "p": "анпак",
     "part": "существительное",
@@ -5782,7 +5795,12 @@
     "contextBlock": [],
     "sortGroup": ""
   }
-];
+]</pre>
+  </details>
+  <!-- PIPSKIY_DICTIONARY_END -->
+
+  <script>
+    const DICTIONARY = JSON.parse(document.getElementById("pipskiy-dictionary-json").textContent);
 
     const VOWELS = 'аеёиоуыэюя';
     const PLURAL_LIGHT_VOWELS = 'аяоёэеиыю';
