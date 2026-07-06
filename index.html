@@ -6642,6 +6642,20 @@
       ['дам','пелмул'], ['дашь','пелмул'], ['даст','пелмул'], ['дадим','пелмул'], ['дадите','пелмул'], ['дадут','пелмул']
     ]);
     const SKIP_RU_PARTICLES = new Set(['ли']);
+    const RU_POSSESSIVE_TO_P = new Map([
+      ['мой','ма'], ['моя','ма'], ['мое','ма'], ['моё','ма'], ['мои','ма'], ['моего','ма'], ['моей','ма'], ['мою','ма'], ['моим','ма'], ['моими','ма'], ['моих','ма'],
+      ['твой','ди'], ['твоя','ди'], ['твое','ди'], ['твоё','ди'], ['твои','ди'], ['твоего','ди'], ['твоей','ди'], ['твою','ди'], ['твоим','ди'], ['твоими','ди'], ['твоих','ди'],
+      ['его','уэка'], ['ее','уэка'], ['её','уэка'], ['свой','уэка'], ['своя','уэка'], ['свое','уэка'], ['своё','уэка'], ['свои','уэка'], ['своего','уэка'], ['своей','уэка'], ['свою','уэка'], ['своим','уэка'], ['своими','уэка'], ['своих','уэка'],
+      ['наш','наву'], ['наша','наву'], ['наше','наву'], ['наши','наву'], ['нашего','наву'], ['нашей','наву'], ['нашу','наву'], ['нашим','наву'], ['нашими','наву'], ['наших','наву'],
+      ['ваш','ни'], ['ваша','ни'], ['ваше','ни'], ['ваши','ни'], ['вашего','ни'], ['вашей','ни'], ['вашу','ни'], ['вашим','ни'], ['вашими','ни'], ['ваших','ни'],
+      ['их','фуп']
+    ]);
+    const RU_OWNER_AFTER_U_TO_P = new Map([
+      ['меня','ма'], ['тебя','ди'], ['него','уэка'], ['нее','уэка'], ['неё','уэка'], ['нас','наву'], ['вас','ни'], ['них','фуп']
+    ]);
+    const RU_SUBJECT_WORDS = new Set(['я','ты','он','она','оно','мы','вы','они']);
+    const RU_EAT_CONTEXT = new Set(['хочу','хочешь','хочет','хотим','хотите','хотят','люблю','любишь','любит','любим','любите','любят','буду','будешь','будет','будем','будете','будут']);
+
 
     function normalizeRu(text) {
       return String(text || '')
@@ -6667,6 +6681,22 @@
     function untokenize(tokens) { return tokens.join(' ').replace(/\s+([,.!?;:])/g, '$1').replace(/\s+…/g, '…').replace(/\s+/g, ' ').trim(); }
     function isWord(token) { return /^[А-Яа-яЁёA-Za-z]+(?:[-'][А-Яа-яЁёA-Za-z]+)*$/.test(token); }
     function escapeHtml(value) { return String(value || '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;'); }
+
+    function entryIsNoun(entry) {
+      return !!(entry && String(entry.part || '').includes('существительное'));
+    }
+    function entryIsAdjective(entry) {
+      return !!(entry && String(entry.part || '').includes('прилагательное'));
+    }
+    function entryIsPronoun(entry) {
+      return !!(entry && String(entry.part || '').includes('местоимение'));
+    }
+    function entryIsVerb(entry) {
+      return !!(entry && entry.part === 'глагол');
+    }
+    function isUniversalPipaEntry(entry) {
+      return !!(entry && (entry.p === 'пипа' || entry.p === 'пипал' || entry.p === 'пипул' || entry.p === 'пипум'));
+    }
 
     function makePluralP(word) {
       const last = normalizeP(word).slice(-1);
@@ -6791,6 +6821,12 @@
         ['срал','срала','срало','срали'].forEach(v=>pushPlain(v,'past'));
         return forms;
       }
+      if (base === 'видеть') {
+        ['вижу','видишь','видит','видим','видите','видят','увижу','увидишь','увидит','увидим','увидите','увидят'].forEach(v=>pushPlain(v,'verb'));
+        ['видел','видела','видело','видели','увидел','увидела','увидело','увидели'].forEach(v=>pushPlain(v,'past'));
+        ['увидь','увидьте'].forEach(v=>pushPlain(v,'imperative'));
+        return forms;
+      }
       if (base.endsWith('ать')) {
         const s = base.slice(0,-3);
         ['аю','аешь','ает','аем','аете','ают'].forEach(e=>push(s+e,'verb'));
@@ -6863,17 +6899,38 @@
     }
     const {pIndex, ruIndex} = buildIndexes();
 
-    function chooseCandidate(candidates, originalText, key='') {
+    function chooseCandidate(candidates, originalText, key='', options={}) {
       if (!candidates || !candidates.length) return null;
       const ctx = normalizeRu(originalText);
+      const normKey = normalizeRu(key);
       const filtered = candidates.filter(cand => !(cand.entry.contextBlock || []).some(b => ctx.includes(normalizeRu(b))));
       if (!filtered.length) return null;
       const rank = {exact: 8, plural: 7, past: 6, future: 6, imperative: 5, verb: 4, normal: 3};
       const isImperativeContext = /!\s*$/.test(originalText.trim());
       const scored = filtered.slice().sort((a,b) => {
-        const aq = (a.quality || 0) + (rank[a.form] || 0) + ((isImperativeContext && a.form === 'imperative') ? 3 : 0);
-        const bq = (b.quality || 0) + (rank[b.form] || 0) + ((isImperativeContext && b.form === 'imperative') ? 3 : 0);
-        return bq - aq;
+        const score = cand => {
+          let value = (cand.quality || 0) + (rank[cand.form] || 0);
+          if (isImperativeContext && cand.form === 'imperative') value += 3;
+          if (options.preferAdjective && entryIsAdjective(cand.entry)) value += 5;
+          if (options.preferNoun && entryIsNoun(cand.entry)) value += 4;
+          if (options.preferVerb && entryIsVerb(cand.entry)) value += 4;
+          if (options.preferPronoun && entryIsPronoun(cand.entry)) value += 3;
+          if (options.preferP && cand.entry && cand.entry.p === options.preferP) value += 8;
+          if (normKey === 'есть') {
+            const prev = normalizeRu(options.prev || '');
+            const next = normalizeRu(options.next || '');
+            if (cand.entry && cand.entry.p === 'налул' && !RU_EAT_CONTEXT.has(prev) && !RU_SUBJECT_WORDS.has(prev)) value += 5;
+            if (cand.entry && cand.entry.p === 'долимбул' && (RU_EAT_CONTEXT.has(prev) || RU_SUBJECT_WORDS.has(prev) || next === 'еду')) value += 5;
+          }
+          if (normKey === 'им' && cand.entry && cand.entry.p === 'фуп') value += 2;
+          if ((normKey === 'что-то' || normKey === 'чтото' || normKey === 'что-нибудь' || normKey === 'что-либо') && cand.entry && cand.entry.p === 'пипукато') value += 6;
+          if (isUniversalPipaEntry(cand.entry) && filtered.some(other => other.entry !== cand.entry && !isUniversalPipaEntry(other.entry))) value -= 2;
+          return value;
+        };
+        const aq = score(a);
+        const bq = score(b);
+        if (bq !== aq) return bq - aq;
+        return String(a.entry.p || '').localeCompare(String(b.entry.p || ''), 'ru');
       });
       return scored[0];
     }
@@ -6934,7 +6991,7 @@
         return true;
       });
       let subject = null;
-      const subjectIndex = core.findIndex(it => it.kind === 'word' && SUBJECT_P.has(normalizeP(it.text)));
+      const subjectIndex = core.findIndex(it => it.kind === 'word' && it.part !== 'possessive' && SUBJECT_P.has(normalizeP(it.text)));
       if (subjectIndex >= 0) subject = core.splice(subjectIndex, 1)[0];
       const verbIndex = core.findIndex(it => it.kind === 'word' && isPVerbText(it.text));
       if (verbIndex < 0) return [...(subject ? [subject] : []), ...core, ...time];
@@ -6942,8 +6999,8 @@
       let before = core.slice(0, verbIndex);
       let after = core.slice(verbIndex);
       const result = [];
-      if (subject) result.push(...leading, subject, ...negItems, ...tenseItems, verb, ...before, ...after, ...time);
-      else result.push(...leading, ...before, ...negItems, ...tenseItems, verb, ...after, ...time);
+      if (subject) result.push(...leading, subject, ...tenseItems, ...negItems, verb, ...before, ...after, ...time);
+      else result.push(...leading, ...before, ...tenseItems, ...negItems, verb, ...after, ...time);
       return result.filter((it, idx, arr) => !(idx && it.kind === 'word' && arr[idx-1].kind === 'word' && normalizeP(it.text) === normalizeP(arr[idx-1].text) && (TENSE_P.has(normalizeP(it.text)) || normalizeP(it.text)==='пи')));
     }
     function reorderPipskiyItems(items) {
@@ -6968,6 +7025,71 @@
       if (form === 'future') return 'вон ' + p;
       return p;
     }
+    function bestTokenMatch(rawTokens, index, input, options={}) {
+      const tok = rawTokens[index];
+      if (!tok || !isWord(tok)) return null;
+      const found = lookupRuCandidates(tok);
+      if (!found) return null;
+      const prev = index > 0 ? rawTokens[index - 1] : '';
+      const next = index + 1 < rawTokens.length ? rawTokens[index + 1] : '';
+      return chooseCandidate(found.candidates, input, found.key, {...options, prev, next});
+    }
+    function nextWordLooksLikeNoun(rawTokens, index, input) {
+      const match = bestTokenMatch(rawTokens, index, input, {preferNoun:true});
+      return !!(match && entryIsNoun(match.entry));
+    }
+    function translatePossessivePhrase(rawTokens, start, input, unknownMode) {
+      const owner = RU_POSSESSIVE_TO_P.get(normalizeRu(rawTokens[start]));
+      if (!owner) return null;
+      const translated = [];
+      let i = start + 1;
+      let foundNoun = false;
+      while (i < rawTokens.length && translated.length < 5 && isWord(rawTokens[i])) {
+        const preferAdjective = !foundNoun && i + 1 < rawTokens.length && nextWordLooksLikeNoun(rawTokens, i + 1, input);
+        const match = bestTokenMatch(rawTokens, i, input, {preferAdjective, preferNoun: translated.length > 0});
+        if (!match) {
+          const rep = replacementForUnknown(rawTokens[i], unknownMode);
+          if (!foundNoun && rep && rep.text && rep.text !== rawTokens[i] && (rep.text === 'пипа' || rep.text === 'пипал')) {
+            translated.push({kind:'word', text:rep.text, part:rep.label || 'неизвестное слово'});
+            translated.push({kind:'word', text:owner, part:'possessive'});
+            foundNoun = true;
+            i++;
+          }
+          break;
+        }
+        if (entryIsAdjective(match.entry) && !foundNoun) {
+          translated.push({kind:'word', text:outputPip(match.entry, match.form), part:match.entry.part || ''});
+          i++;
+          continue;
+        }
+        if (entryIsNoun(match.entry)) {
+          translated.push({kind:'word', text:outputPip(match.entry, match.form), part:match.entry.part || ''});
+          translated.push({kind:'word', text:owner, part:'possessive'});
+          foundNoun = true;
+          i++;
+          break;
+        }
+        break;
+      }
+      return foundNoun ? {items: translated, nextIndex: i} : null;
+    }
+    function possessionHavePhrase(rawTokens, start) {
+      if (normalizeRu(rawTokens[start]) !== 'у' || start + 2 >= rawTokens.length) return null;
+      const owner = RU_OWNER_AFTER_U_TO_P.get(normalizeRu(rawTokens[start + 1]));
+      if (!owner) return null;
+      const marker = normalizeRu(rawTokens[start + 2]);
+      let form = 'verb'; let neg = false;
+      if (marker === 'есть') form = 'verb';
+      else if (marker === 'нет') neg = true;
+      else if (PAST_AUX_RU.has(marker)) form = 'past';
+      else if (FUTURE_AUX_RU.has(marker)) form = 'future';
+      else return null;
+      const have = pIndex.get('налул');
+      const items = [{kind:'word', text:owner, part:'местоимение'}];
+      if (neg) items.push({kind:'word', text:'пи', part:'частица'});
+      items.push({kind:'word', text:outputPip(have, form), part:'глагол'});
+      return {items, nextIndex:start + 3, preferSingularObject: neg};
+    }
     function russianToPipskiy(input, unknownMode) {
       const rawTokens = tokenize(input);
       const isQuestion = /\?\s*$/.test(input) || /(^|\s)ли(\s|\?|$)/i.test(input);
@@ -6983,7 +7105,7 @@
       const segmentFutureCues = segmentWords.map(words => words.some(t => FUTURE_AUX_RU.has(t) || FUTURE_TIME_RU.has(t) || FUTURE_FORM_MAP.has(t)));
       const segmentPastCues = segmentWords.map(words => words.some(t => PAST_TIME_RU.has(t)));
       const outputItems = []; const unknowns = []; const details = [];
-      let i = 0; let pendingTense = ''; const verbTimeBySegment = new Set();
+      let i = 0; let pendingTense = ''; let preferSingularObjectOnce = false; const verbTimeBySegment = new Set();
       function pushWord(text, part='') { outputItems.push({kind:'word', text, part}); }
       function pushPunct(text) { outputItems.push({kind:'punct', text}); }
       while (i < rawTokens.length) {
@@ -6991,6 +7113,10 @@
         if (PUNCT.has(tok)) { pushPunct(tok); if ('.!?,;:'.includes(tok)) pendingTense = ''; i++; continue; }
         if (!isWord(tok)) { outputItems.push({kind:'raw', text:tok}); i++; continue; }
         const simpleKey = normalizeRu(tok);
+        const havePhrase = possessionHavePhrase(rawTokens, i);
+        if (havePhrase) { outputItems.push(...havePhrase.items); preferSingularObjectOnce = !!havePhrase.preferSingularObject; i = havePhrase.nextIndex; continue; }
+        const possPhrase = translatePossessivePhrase(rawTokens, i, input, unknownMode);
+        if (possPhrase) { outputItems.push(...possPhrase.items); i = possPhrase.nextIndex; continue; }
         if (FUTURE_AUX_RU.has(simpleKey)) { pendingTense = 'future'; i++; continue; }
         if (PAST_AUX_RU.has(simpleKey)) { pendingTense = 'past'; i++; continue; }
         if (PAST_TIME_RU.has(simpleKey)) { pendingTense = 'past'; details.push('«' + tok + '» использовано как подсказка прошлого времени; отдельное пипское слово пока не добавлено.'); i++; continue; }
@@ -7006,12 +7132,15 @@
             const phrase = normalizeRu(slice.join(' '));
             const compact = compactRu(slice.join(' '));
             let found = lookupRuCandidates(phrase) || lookupRuCandidates(compact);
-            if (found) { matched = chooseCandidate(found.candidates, input, found.key); matchedLen = len; break; }
+            if (found) { matched = chooseCandidate(found.candidates, input, found.key, {prev: rawTokens[i-1] || '', next: rawTokens[i+len] || ''}); matchedLen = len; break; }
           }
         }
         if (!matched) {
           const found = lookupRuCandidates(tok);
-          if (found) matched = chooseCandidate(found.candidates, input, found.key);
+          if (found) {
+            const preferAdjective = nextWordLooksLikeNoun(rawTokens, i + 1, input);
+            matched = chooseCandidate(found.candidates, input, found.key, {prev: rawTokens[i-1] || '', next: rawTokens[i+1] || '', preferAdjective});
+          }
           matchedLen = 1;
         }
 
@@ -7024,6 +7153,12 @@
             if (pendingTense) { form = pendingTense; pendingTense = ''; verbTimeBySegment.add(segIdx); }
             else if (!alreadyTimed && segmentFutureCues[segIdx] && form !== 'past') { form = 'future'; verbTimeBySegment.add(segIdx); }
             else if (!alreadyTimed && segmentPastCues[segIdx] && form !== 'future') { form = 'past'; verbTimeBySegment.add(segIdx); }
+          }
+          if (preferSingularObjectOnce && entryIsNoun(matched.entry) && !matched.entry.ruPlural) {
+            form = 'normal';
+            preferSingularObjectOnce = false;
+          } else if (entryIsNoun(matched.entry)) {
+            preferSingularObjectOnce = false;
           }
           pushWord(outputPip(matched.entry, form), matched.entry.part || '');
           i += matchedLen; continue;
@@ -7054,7 +7189,7 @@
       result = result.replace(/\s+,/g, ',').replace(/\s+([.!?;:])/g, '$1');
       result = applySentenceCase(input, result);
       if (unknowns.length) details.push('Заменены/не найдены: ' + unknowns.join('; '));
-      details.push('Режим: русский → пипский, словарь + правила форм, времени и базового порядка слов. Слова не выдумываются. Используются формы пипа/пипул/пипум/пипал.');
+      details.push('Режим: русский → пипский, словарь + правила форм, времени, притяжания и базового порядка слов. Слова не выдумываются. Используются формы пипа/пипул/пипум/пипал.');
       return {result: result || '—', details: details.join('\n')};
     }
     function detectPipskiyPlural(word) {
@@ -7081,6 +7216,22 @@
       if (first.endsWith('а')) return first.slice(0,-1) + 'у';
       if (first.endsWith('я')) return first.slice(0,-1) + 'ю';
       return first;
+    }
+    function possessiveRuForm(ownerKey, noun, plural=false, accusative=false) {
+      const owner = normalizeP(ownerKey);
+      if (owner === 'уэка') return 'его';
+      if (owner === 'фуп') return 'их';
+      const forms = {
+        'ма': {m:'мой', f:'моя', n:'моё', p:'мои', fa:'мою'},
+        'ди': {m:'твой', f:'твоя', n:'твоё', p:'твои', fa:'твою'},
+        'наву': {m:'наш', f:'наша', n:'наше', p:'наши', fa:'нашу'},
+        'ни': {m:'ваш', f:'ваша', n:'ваше', p:'ваши', fa:'вашу'}
+      }[owner];
+      if (!forms) return '';
+      if (plural) return forms.p;
+      const g = nounGender(noun);
+      if (accusative && g === 'f') return forms.fa;
+      return forms[g] || forms.m;
     }
     function futureAux(subjectKey) { return ({'ма':'буду','ди':'будешь','уэка':'будет','наву':'будем','ни':'будете','фуп':'будут'})[subjectKey] || 'будет'; }
     function translateVerbToRu(entry, subjectKey, tense, neg, isImperative) {
@@ -7134,10 +7285,13 @@
       const tokens = tokenize(input);
       const items = []; const literal = []; const details = [];
       let isQuestion = false; let tense = 'present'; let lastSubject = ''; let negNext = false; let firstWordProcessed = false; let expectObject = false;
-      for (const tok of tokens) {
+      for (let ti = 0; ti < tokens.length; ti++) {
+        const tok = tokens[ti];
         if (PUNCT.has(tok)) { if (tok === '?') isQuestion = true; else { items.push({text:tok, part:'punct'}); literal.push(tok); } continue; }
         if (!isWord(tok)) { items.push({text:tok, part:'raw'}); literal.push(tok); continue; }
         const key = normalizeP(tok);
+        const prevEntry = ti > 0 && isWord(tokens[ti-1]) ? (pIndex.get(normalizeP(tokens[ti-1])) || detectPipskiyPlural(tokens[ti-1])) : null;
+        const isPossessiveAfterNoun = entryIsPronoun(pIndex.get(key)) && entryIsNoun(prevEntry);
         if (key === 'но') { isQuestion = true; continue; }
         if (key === 'лан') { tense = 'past'; literal.push('прошлое'); continue; }
         if (key === 'вон') { tense = 'future'; literal.push('будущее'); continue; }
@@ -7145,7 +7299,7 @@
         let entry = pIndex.get(key); let wasPlural = false;
         if (entry && (entry.part || '').includes('мн.')) wasPlural = true;
         if (!entry) { const pl = detectPipskiyPlural(tok); if (pl) { entry = pl; wasPlural = true; } }
-        let translated = ''; let lit = ''; let part = ''; let sourceEntry = entry || null;
+        let translated = ''; let lit = ''; let part = ''; let sourceEntry = entry || null; let wasObject = false;
         if (entry) {
           lit = (wasPlural ? russianPlural(entry) : (entry.ru && entry.ru[0] ? entry.ru[0].split(';')[0].trim() : entry.p)).toLowerCase();
           part = entry.part || '';
@@ -7158,10 +7312,18 @@
           else if (entry.p === 'пипал') {
             translated = (negNext ? 'не ' : '') + 'пипы'; lit = 'пипы'; negNext = false; lastSubject='фуп'; expectObject=false;
           }
-          else if (entry.part === 'местоимение') { translated = lit; lastSubject = key; }
+          else if (entry.part === 'местоимение') {
+            if (isPossessiveAfterNoun) { translated = ''; part = 'possessivePronoun'; }
+            else { translated = lit; lastSubject = key; }
+          }
           else if (entry.part === 'глагол') { translated = translateVerbToRu(entry,lastSubject,tense,negNext,!firstWordProcessed && /!\s*$/.test(input)); tense='present'; negNext=false; expectObject = true; }
           else if (wasPlural) { translated = russianPlural(entry); lastSubject='фуп'; expectObject=false; }
-          else { translated = (negNext ? 'не ' : '') + ((expectObject && (entry.part||'').includes('существительное')) ? russianAccusative(entry) : lit); negNext=false; if ((entry.part||'').includes('существительное')) { lastSubject='уэка'; expectObject=false; } }
+          else {
+            wasObject = !!(expectObject && (entry.part||'').includes('существительное'));
+            translated = (negNext ? 'не ' : '') + (wasObject ? russianAccusative(entry) : lit);
+            negNext=false;
+            if ((entry.part||'').includes('существительное')) { lastSubject='уэка'; expectObject=false; }
+          }
         } else if (key.endsWith('ул')) {
           translated = tok; lit=tok; part='глагол'; negNext=false; details.push(`${tok} похоже на глагол, но его основы нет в словаре.`);
         }
@@ -7171,7 +7333,7 @@
         else {
           translated = tok; lit=tok; negNext=false; details.push(`${tok} не найдено в словаре.`);
         }
-        items.push({text:translated, lit, part, wasPlural, entry:sourceEntry});
+        items.push({text:translated, lit, part, wasPlural, entry:sourceEntry, key, wasObject});
         literal.push(lit); firstWordProcessed = true;
       }
       for (let i=0; i<items.length-1; i++) {
@@ -7181,7 +7343,23 @@
           a.text = adjectiveForNoun(a.text, noun, !!b.wasPlural);
         }
       }
-      let result = untokenize(items.map(x => x.text));
+      const combinedItems = [];
+      for (let i=0; i<items.length; i++) {
+        const cur = items[i], next = items[i+1];
+        if ((cur.part || '').includes('существительное') && next && next.part === 'possessivePronoun') {
+          const poss = possessiveRuForm(next.key, cur.lit || cur.text, !!cur.wasPlural, !!cur.wasObject);
+          const prev = combinedItems[combinedItems.length - 1];
+          if (prev && (prev.part || '').includes('прилагательное')) {
+            combinedItems.pop();
+            cur.text = [poss, prev.text, cur.text].filter(Boolean).join(' ');
+          } else {
+            cur.text = [poss, cur.text].filter(Boolean).join(' ');
+          }
+          i++;
+        }
+        if (cur.text) combinedItems.push(cur);
+      }
+      let result = untokenize(combinedItems.map(x => x.text));
       result = polishRussianResult(result);
       const end = isQuestion ? '?' : (/[.!]$/.test(input.trim()) ? input.trim().slice(-1) : '');
       if (end && !/[.!?]$/.test(result)) result += end;
