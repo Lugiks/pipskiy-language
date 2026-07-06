@@ -1,54 +1,53 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
   <title>Словарь Пипского языка</title>
-  <meta name="description" content="Отдельная страница словаря Пипского языка. Словарь автоматически читается из index.html, чтобы не вести две разные версии.">
+  <meta name="description" content="Отдельная страница словаря Пипского языка. Данные автоматически читаются из JSON-блока внутри index.html.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    :root { --bg:#f6f3ee; --paper:#fffaf3; --ink:#202020; --muted:#666; --border:#d8cfc1; --accent:#5f4b32; --surface:#fbf7ef; --surface2:#efe6d8; }
-    * { box-sizing: border-box; }
-    body { margin:0; background:var(--bg); color:var(--ink); font-family: Arial, sans-serif; line-height:1.55; }
-    main { max-width:1100px; margin:0 auto; padding:32px 22px 48px; }
-    h1 { margin:0 0 8px; font-size:34px; }
-    p { margin:8px 0; }
-    a { color:var(--accent); }
-    .lead { font-size:18px; }
-    .note { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:14px 16px; margin:16px 0; }
-    .tools { display:grid; grid-template-columns:minmax(220px, 1fr) auto; gap:10px; align-items:end; margin:18px 0 12px; }
-    label { display:block; font-size:13px; color:var(--muted); margin-bottom:4px; }
-    input { width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:10px; font-size:16px; background:white; }
-    button { padding:10px 13px; border:1px solid var(--border); border-radius:10px; background:var(--surface2); cursor:pointer; }
-    table { width:100%; border-collapse:collapse; background:white; font-size:15px; }
-    th, td { border:1px solid var(--border); padding:8px; text-align:left; vertical-align:top; }
-    th { background:var(--surface2); position:sticky; top:0; cursor:pointer; }
-    tr:nth-child(even) { background:var(--surface); }
-    code { background:#eee3d3; padding:2px 5px; border-radius:6px; }
+    :root { --border:#a2a9b1; --muted:#54595d; --surface:#f8f9fa; --surface-2:#eaecf0; --link:#0645ad; --accent:#36c; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:Arial, sans-serif; line-height:1.6; background:#f6f6f6; color:#202122; }
+    .page { max-width:1180px; margin:0 auto; background:white; padding:34px; min-height:100vh; }
+    h1 { font-size:38px; line-height:1.15; margin:0 0 10px; border-bottom:1px solid var(--border); padding-bottom:10px; }
+    a { color:var(--link); text-decoration:none; } a:hover { text-decoration:underline; }
+    code { background:var(--surface); border:1px solid #eaecf0; padding:1px 5px; border-radius:4px; }
+    .lead { font-size:18px; max-width:900px; }
+    .note { background:var(--surface); border-left:4px solid var(--accent); padding:12px 16px; margin:16px 0; }
     .muted { color:var(--muted); }
+    .tools { display:grid; grid-template-columns:minmax(240px, 1fr) auto; gap:10px; align-items:end; margin:18px 0 12px; }
+    input[type="text"] { width:100%; border:1px solid var(--border); border-radius:4px; background:white; color:#202122; padding:9px; font-size:16px; font-family:Arial, sans-serif; }
+    button { border:1px solid #36c; background:#36c; color:white; border-radius:4px; padding:9px 13px; font-size:15px; cursor:pointer; }
+    button.secondary { background:white; color:#36c; }
+    table { border-collapse:collapse; width:100%; margin-top:12px; font-size:15px; }
+    th, td { border:1px solid var(--border); padding:8px; text-align:left; vertical-align:top; }
+    th { background:var(--surface-2); cursor:pointer; position:sticky; top:0; }
+    tr:nth-child(even) { background:var(--surface); }
     .status { margin:10px 0; color:var(--muted); }
-    .error { background:#fff1f1; border:1px solid #e0a0a0; color:#6b1111; border-radius:12px; padding:12px; margin:14px 0; }
-    .footer { margin-top:22px; color:var(--muted); font-size:13px; }
-    @media (max-width:700px) { .tools { grid-template-columns:1fr; } th, td { font-size:14px; } }
+    .error { background:#fff1f1; border:1px solid #e0a0a0; color:#6b1111; border-radius:8px; padding:12px; margin:14px 0; }
+    .footer { margin-top:30px; padding-top:16px; border-top:1px solid var(--border); font-size:14px; color:var(--muted); }
+    @media (max-width:850px) { .page { padding:20px; } .tools { grid-template-columns:1fr; } }
   </style>
 </head>
 <body>
-  <main>
+  <main class="page">
     <h1>Словарь Пипского языка</h1>
-    <p class="lead">Это отдельная страница словаря. Её не надо редактировать вручную: она автоматически читает словарь из <a href="index.html"><code>index.html</code></a>.</p>
+    <p class="lead">Это второй файл только для просмотра. Его не нужно редактировать: он автоматически берёт словарь из <a href="index.html"><code>index.html</code></a>.</p>
     <div class="note">
-      <p><b>Главный источник:</b> словарь хранится в <code>index.html</code> внутри массива <code>DICTIONARY</code>. Эта страница подтягивает его оттуда, сортирует и показывает понятной таблицей.</p>
-      <p class="muted">Если словарь изменён в <code>index.html</code>, эта страница обновится сама после перезагрузки.</p>
+      <p><b>Главный источник словаря:</b> JSON-блок в <code>index.html</code> между метками <code>PIPSKIY_DICTIONARY_START</code> и <code>PIPSKIY_DICTIONARY_END</code>.</p>
+      <p class="muted">Чтобы добавить слово, редактируй только <code>index.html</code>. В этом файле словарь не хранится и не дублируется.</p>
     </div>
 
     <div class="tools">
       <div>
         <label for="search">Поиск по словарю</label>
-        <input id="search" type="search" placeholder="Например: кутак, вода, цвет, оскорбление">
+        <input id="search" type="text" placeholder="Например: кутак, вода, цвет, унитаз">
       </div>
-      <button id="clear" type="button">Очистить</button>
+      <button id="clear" type="button" class="secondary">Очистить</button>
     </div>
     <div class="status" id="status">Загружаю словарь из index.html...</div>
-    <noscript><div class="error">Для автоматической загрузки словаря из index.html нужен JavaScript. Сам словарь хранится в index.html в массиве DICTIONARY.</div></noscript>
+    <noscript><div class="error">Для автоматической загрузки словаря нужен JavaScript. Сам словарь хранится в index.html в JSON-блоке.</div></noscript>
 
     <table id="dictionaryTable">
       <thead>
@@ -57,7 +56,7 @@
       <tbody></tbody>
     </table>
 
-    <div class="footer">Пипский язык — авторский конструируемый язык. Страница словаря автоматически построена из index.html.</div>
+    <div class="footer">Пипский язык — авторский конструируемый язык. Эта таблица автоматически построена из index.html.</div>
   </main>
 
   <script>
@@ -69,11 +68,6 @@
       return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
     }
 
-    function entryText(entry) {
-      return [entry.p, entry.part, (entry.ru || []).join(', '), entry.base, entry.note, entry.sense, (entry.tags || []).join(', ')]
-        .join(' ').toLowerCase();
-    }
-
     function noteText(entry) {
       const bits = [];
       if (entry.base) bits.push('основа: ' + entry.base);
@@ -83,11 +77,9 @@
       return bits.join('; ');
     }
 
-    function visibleEntries() {
-      const q = document.getElementById('search').value.trim().toLowerCase();
-      return dictionary
-        .filter(e => !e.hidden)
-        .filter(e => !q || entryText(e).includes(q));
+    function entryText(entry) {
+      return [entry.p, entry.part, (entry.ru || []).join(', '), entry.base, entry.note, entry.sense, (entry.tags || []).join(', '), (entry.inputs || []).join(', ')]
+        .join(' ').toLowerCase();
     }
 
     function columnValue(entry, col) {
@@ -97,14 +89,18 @@
       return noteText(entry);
     }
 
+    function visibleEntries() {
+      const q = document.getElementById('search').value.trim().toLowerCase();
+      return dictionary.filter(e => !e.hidden).filter(e => !q || entryText(e).includes(q));
+    }
+
     function render() {
-      const tbody = document.querySelector('#dictionaryTable tbody');
       const rows = visibleEntries().sort((a, b) => {
         const av = columnValue(a, sortColumn);
         const bv = columnValue(b, sortColumn);
         return (sortAsc ? 1 : -1) * av.localeCompare(bv, 'ru');
       });
-      tbody.innerHTML = rows.map(entry => `
+      document.querySelector('#dictionaryTable tbody').innerHTML = rows.map(entry => `
         <tr>
           <td><code>${safeText(entry.p)}</code></td>
           <td>${safeText(entry.part || '')}</td>
@@ -114,10 +110,24 @@
       document.getElementById('status').textContent = `${rows.length} показано, всего ${dictionary.filter(e => !e.hidden).length} слов/форм`;
     }
 
-    function extractDictionary(html) {
+    function extractDictionaryFromIndex(html) {
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      const pre = doc.querySelector('#pipskiy-dictionary-json');
+      if (pre) {
+        const data = JSON.parse(pre.textContent);
+        if (!Array.isArray(data)) throw new Error('JSON-блок словаря в index.html должен быть массивом');
+        return data;
+      }
+
+      // Запасной вариант для старой версии index.html, где был JS-массив DICTIONARY.
       const match = html.match(/const\s+DICTIONARY\s*=\s*(\[[\s\S]*?\]);/);
-      if (!match) throw new Error('Не найден массив DICTIONARY в index.html');
-      return Function('"use strict"; return (' + match[1] + ');')();
+      if (match) {
+        const data = JSON.parse(match[1]);
+        if (!Array.isArray(data)) throw new Error('DICTIONARY в index.html должен быть массивом');
+        return data;
+      }
+
+      throw new Error('Не найден словарь: нужен блок #pipskiy-dictionary-json в index.html');
     }
 
     async function loadDictionary() {
@@ -126,7 +136,7 @@
         const response = await fetch('index.html?dictionary=' + Date.now(), { cache: 'no-store' });
         if (!response.ok) throw new Error('Не удалось загрузить index.html: ' + response.status);
         const html = await response.text();
-        dictionary = extractDictionary(html);
+        dictionary = extractDictionaryFromIndex(html);
         render();
       } catch (err) {
         status.innerHTML = '<span class="error">Ошибка: ' + safeText(err.message) + '. На GitHub Pages это должно работать; если файл открыт прямо с компьютера, браузер может блокировать чтение index.html.</span>';
@@ -135,14 +145,10 @@
 
     document.getElementById('search').addEventListener('input', render);
     document.getElementById('clear').addEventListener('click', () => { document.getElementById('search').value = ''; render(); });
-    document.querySelectorAll('#dictionaryTable th').forEach((th, i) => {
-      th.addEventListener('click', () => {
-        if (sortColumn === i) sortAsc = !sortAsc;
-        else { sortColumn = i; sortAsc = true; }
-        render();
-      });
-    });
-
+    document.querySelectorAll('th').forEach((th, index) => th.addEventListener('click', () => {
+      if (sortColumn === index) sortAsc = !sortAsc; else { sortColumn = index; sortAsc = true; }
+      render();
+    }));
     loadDictionary();
   </script>
 </body>
